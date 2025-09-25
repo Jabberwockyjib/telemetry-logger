@@ -11,6 +11,7 @@ import serial.tools.list_ports
 
 from ..db.crud import signal_crud
 from ..services.websocket_bus import websocket_bus
+from ..services.db_writer import db_writer, TelemetryData
 
 logger = logging.getLogger(__name__)
 
@@ -365,11 +366,20 @@ class GPSService:
                 "unit": self._get_unit(key),
             })
         
-        # Store in database (async)
+        # Store in database via database writer
         if db_data:
-            # Note: In a real implementation, this would use a proper database session
-            # For now, we'll just log the data
-            logger.debug(f"GPS data for session {self.session_id}: {len(db_data)} signals")
+            for signal_data in db_data:
+                telemetry_data = TelemetryData(
+                    session_id=signal_data["session_id"],
+                    source=signal_data["source"],
+                    channel=signal_data["channel"],
+                    value_num=signal_data["value_num"],
+                    value_text=signal_data["value_text"],
+                    unit=signal_data["unit"],
+                    quality="good",
+                    timestamp=signal_data["ts_utc"],
+                )
+                await db_writer.queue_signal(telemetry_data)
         
         # Broadcast to WebSocket
         await websocket_bus.broadcast_to_session(self.session_id, {

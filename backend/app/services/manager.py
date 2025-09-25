@@ -7,6 +7,7 @@ from typing import Dict, Optional, Set
 from ..db.crud import session_crud
 from ..db.models import Session
 from sqlalchemy.ext.asyncio import AsyncSession
+from .db_writer import db_writer, TelemetryData
 
 
 class ServiceManager:
@@ -41,6 +42,10 @@ class ServiceManager:
                 return False
             
             try:
+                # Start database writer if not already running
+                if not db_writer.is_running:
+                    await db_writer.start()
+                
                 # Start data collection services (stubs for now)
                 tasks = {
                     "obd_service": asyncio.create_task(self._obd_service_stub(session_id)),
@@ -219,6 +224,10 @@ class ServiceManager:
             
             self._active_sessions.clear()
             self._service_tasks.clear()
+            
+            # Stop database writer
+            if db_writer.is_running:
+                await db_writer.stop()
 
 
 # Global service manager instance

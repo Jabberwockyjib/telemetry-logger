@@ -57,6 +57,7 @@ except ImportError:
     obd = MockOBDModule()
 
 from ..services.websocket_bus import websocket_bus
+from ..services.db_writer import db_writer, TelemetryData
 
 logger = logging.getLogger(__name__)
 
@@ -346,6 +347,17 @@ class OBDService:
             "quality": quality,
             "description": pid_config.get("description", ""),
         }
+        
+        # Store in database via database writer
+        telemetry_data = TelemetryData(
+            session_id=self.session_id,
+            source="obd",
+            channel=pid_name,
+            value_num=value,
+            unit=final_unit,
+            quality=quality,
+        )
+        await db_writer.queue_signal(telemetry_data)
         
         # Broadcast to WebSocket
         await websocket_bus.broadcast_to_session(self.session_id, ws_data)
