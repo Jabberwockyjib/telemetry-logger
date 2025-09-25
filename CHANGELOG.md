@@ -38,11 +38,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Alembic migration system with initial schema
 - Database initialization scripts
 - `pyserial>=3.5` dependency for serial port communication
+- OBD-II service (`backend/app/services/obd_service.py`) with python-OBD integration:
+  - Configurable PID set with per-PID collection rates
+  - Automatic PID discovery and unsupported PID handling
+  - Real-time OBD data collection with WebSocket streaming
+  - Graceful error handling and automatic reconnection
+  - Comprehensive PID support (speed, RPM, throttle, engine load, etc.)
+  - Quality indicators and unit conversion for all readings
+- `obd>=0.7.1` dependency for OBD-II communication (Python < 3.12 compatible)
 
 ### Changed
 - Updated FastAPI app to include session routes, WebSocket routes, and service manager integration
 - Enhanced application lifespan management for proper service cleanup including WebSocket bus shutdown
 - Service manager now integrates with WebSocket bus for real-time data broadcasting
+- OBD service integration with service manager for real-time automotive data collection
 
 ### Technical Details
 - Full async/await support throughout the application

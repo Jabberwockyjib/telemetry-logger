@@ -126,31 +126,31 @@ class ServiceManager:
             del self._service_tasks[session_id]
     
     async def _obd_service_stub(self, session_id: int) -> None:
-        """Stub OBD-II data collection service.
+        """OBD-II data collection service.
         
         Args:
             session_id: ID of the session to collect data for.
         """
         try:
+            from .obd_service import OBDService
+            
+            # Create and start OBD service
+            obd_service = OBDService()
+            await obd_service.start(session_id)
+            
+            # Keep the service running
             while True:
-                # TODO: Implement actual OBD-II data collection
-                print(f"OBD service collecting data for session {session_id}")
-                
-                # Broadcast stub data via WebSocket
-                from .websocket_bus import websocket_bus
-                stub_data = {
-                    "source": "obd",
-                    "speed_kph": 65.0,
-                    "rpm": 2500,
-                    "throttle_percent": 45.0,
-                    "coolant_temp_c": 85.0,
-                }
-                await websocket_bus.broadcast_to_session(session_id, stub_data)
-                
-                await asyncio.sleep(0.1)  # 10 Hz collection rate
+                await asyncio.sleep(1.0)
                 
         except asyncio.CancelledError:
             print(f"OBD service stopped for session {session_id}")
+            if 'obd_service' in locals():
+                await obd_service.stop()
+            raise
+        except Exception as e:
+            print(f"OBD service error for session {session_id}: {e}")
+            if 'obd_service' in locals():
+                await obd_service.stop()
             raise
     
     async def _gps_service_stub(self, session_id: int) -> None:
