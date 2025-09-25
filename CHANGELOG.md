@@ -73,6 +73,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Meshtastic service lifecycle testing
   - Custom test frame generation and transmission
   - Comprehensive test data validation and performance metrics
+- Frontend dashboard (`frontend/`) for real-time telemetry visualization:
+  - Clean, minimal HTML interface with responsive design
+  - WebSocket connection to `/ws` endpoint for live data streaming
+  - Chart.js integration for rolling plots (speed/RPM, engine parameters)
+  - Leaflet integration for live GPS map with track recording
+  - Summary cards for GPS, vehicle, engine, and system status
+  - Real-time data updates with smooth animations and performance optimization
+  - Configurable chart time ranges (1-30 minutes) and data point limiting
+  - Interactive map with auto-centering, track recording, and detailed popups
+  - Comprehensive README with usage instructions and troubleshooting
 
 ### Changed
 - Updated FastAPI app to include session routes, WebSocket routes, and service manager integration
