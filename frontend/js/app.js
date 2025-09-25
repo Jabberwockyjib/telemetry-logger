@@ -68,7 +68,7 @@ class TelemetryApp {
     
     async loadSessions() {
         try {
-            const response = await fetch('/api/sessions');
+            const response = await fetch('/api/v1/sessions');
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
@@ -110,7 +110,7 @@ class TelemetryApp {
         try {
             // Build WebSocket URL
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.host}/ws?session_id=${this.sessionId}`;
+            const wsUrl = `${protocol}//${window.location.host}/api/v1/ws?session_id=${this.sessionId}`;
             
             // Create WebSocket connection
             this.ws = new WebSocket(wsUrl);
