@@ -135,6 +135,18 @@ class ServiceManager:
             while True:
                 # TODO: Implement actual OBD-II data collection
                 print(f"OBD service collecting data for session {session_id}")
+                
+                # Broadcast stub data via WebSocket
+                from .websocket_bus import websocket_bus
+                stub_data = {
+                    "source": "obd",
+                    "speed_kph": 65.0,
+                    "rpm": 2500,
+                    "throttle_percent": 45.0,
+                    "coolant_temp_c": 85.0,
+                }
+                await websocket_bus.broadcast_to_session(session_id, stub_data)
+                
                 await asyncio.sleep(0.1)  # 10 Hz collection rate
                 
         except asyncio.CancelledError:
@@ -151,6 +163,19 @@ class ServiceManager:
             while True:
                 # TODO: Implement actual GPS data collection
                 print(f"GPS service collecting data for session {session_id}")
+                
+                # Broadcast stub data via WebSocket
+                from .websocket_bus import websocket_bus
+                stub_data = {
+                    "source": "gps",
+                    "latitude": 37.7749,
+                    "longitude": -122.4194,
+                    "altitude_m": 10.0,
+                    "speed_kph": 65.0,
+                    "heading_deg": 45.0,
+                }
+                await websocket_bus.broadcast_to_session(session_id, stub_data)
+                
                 await asyncio.sleep(0.1)  # 10 Hz collection rate
                 
         except asyncio.CancelledError:
@@ -167,6 +192,17 @@ class ServiceManager:
             while True:
                 # TODO: Implement actual Meshtastic uplink
                 print(f"Meshtastic service uplinking data for session {session_id}")
+                
+                # Broadcast uplink status via WebSocket
+                from .websocket_bus import websocket_bus
+                uplink_data = {
+                    "source": "meshtastic",
+                    "status": "uplinked",
+                    "packet_size_bytes": 64,
+                    "signal_strength": -85,
+                }
+                await websocket_bus.broadcast_to_session(session_id, uplink_data)
+                
                 await asyncio.sleep(1.0)  # 1 Hz uplink rate
                 
         except asyncio.CancelledError:
