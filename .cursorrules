@@ -1,0 +1,32 @@
+# Telemetry workspace rules (keep Cursor on target)
+
+## Goals
+- Async FastAPI backend with SQLAlchemy 2.0 (async engine).
+- Timeseries schema: `sessions`, `signals` (append-only), optional `frames`.
+- WebSocket for live frames; REST for history & exports.
+- Meshtastic uplink @ ~1 Hz using compact packed payloads.
+- Plain HTML/JS (Chart.js, Leaflet later) — no heavy framework.
+
+## Constraints
+- Python >=3.10. Typed, small modules (< 300 LoC). No blocking I/O in event loop.
+- UTC timestamps + ns-resolution monotonic ordering; SI units; snake_case channels.
+- Avoid global state. Inject dependencies (DB, bus) via FastAPI lifespans.
+
+## Code Style
+- Use Ruff, Black, MyPy; docstrings on public functions.
+- Favor composition over inheritance; narrow interfaces for services.
+- Don’t pre-optimize; batch DB writes (executemany) where obvious.
+
+## Task Priorities
+1) Make server boot and serve /health and WS echo with mock data.
+2) Create DB models and simple inserts/queries.
+3) Wire OBD/GPS stubs → WS.
+4) Add Meshtastic packer + 1 Hz sender (behind feature flag).
+5) Add CSV/Parquet export, then charts & map.
+
+## Non-Goals (for MVP)
+- Video capture, auth, multi-user, TimescaleDB, heavy front-end frameworks.
+
+## Testing
+- Unit: packing/parsing, timebase.
+- Integration: DB insert/query, WS roundtrip.
