@@ -83,9 +83,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Configurable chart time ranges (1-30 minutes) and data point limiting
   - Interactive map with auto-centering, track recording, and detailed popups
   - Comprehensive README with usage instructions and troubleshooting
+- CSV/Parquet export endpoints (`/api/v1/export/`) for data export:
+  - Streaming CSV export for signals and frames with configurable filters
+  - Parquet export with binary streaming for large datasets
+  - Time range filtering (start_time, end_time) for historical data
+  - Source and channel filtering for targeted data export
+  - Pagination support for efficient large dataset processing
+  - Automatic filename generation with timestamps
+  - Comprehensive error handling and validation
+- Data replay page (`frontend/replay.html`) for historical telemetry visualization:
+  - Session selection dropdown with automatic loading
+  - Time scrubber with play/pause controls for data navigation
+  - Real-time statistics display (total signals, duration, sources, channels)
+  - Historical chart visualization with Chart.js integration
+  - GPS track replay with Leaflet map integration
+  - Export functionality for downloaded data analysis
+  - Responsive design with touch-friendly controls
+- Comprehensive export test suite (`tests/test_export.py`):
+  - 12 test cases covering all export functionality
+  - Streaming performance validation
+  - Error handling and edge case testing
+  - Filter validation and parameter testing
+  - Large dataset pagination testing
 
 ### Changed
-- Updated FastAPI app to include session routes, WebSocket routes, and service manager integration
+- Updated FastAPI app to include session routes, WebSocket routes, export routes, and service manager integration
 - Enhanced application lifespan management for proper service cleanup including WebSocket bus shutdown
 - Service manager now integrates with WebSocket bus for real-time data broadcasting
 - OBD service integration with service manager for real-time automotive data collection
@@ -93,6 +115,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Service manager integrates with database writer for coordinated data collection and storage
 - GPS and OBD services now send telemetry data to Meshtastic service for radio uplink
 - Service manager integrates with Meshtastic service for 1 Hz frame publishing
+- Added pagination support to CRUD operations for efficient data export
+- Enhanced database models with additional query methods for export functionality
 
 ### Technical Details
 - Full async/await support throughout the application

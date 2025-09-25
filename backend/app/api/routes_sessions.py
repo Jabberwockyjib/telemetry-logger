@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db.base import get_db
-from ..db.crud import session_crud
+from ..db.crud import session_crud, signal_crud
 from ..services.manager import service_manager
 from ..utils.schemas import (
     ErrorResponse,
@@ -256,4 +256,73 @@ async def stop_session(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to stop session {session_id}: {str(e)}",
+        )
+
+
+@router.get(
+    "/sessions/{session_id}/signals",
+    summary="Get session signals",
+    description="Get all signals for a specific session.",
+)
+async def get_session_signals(
+    session_id: int,
+    limit: int = Query(10000, ge=1, le=100000, description="Maximum number of signals to return"),
+    offset: int = Query(0, ge=0, description="Number of signals to skip"),
+    db: AsyncSession = Depends(get_db),
+) -> List[dict]:
+    """Get all signals for a specific session.
+    
+    Args:
+        session_id: ID of the session.
+        limit: Maximum number of signals to return.
+        offset: Number of signals to skip.
+        db: Database session dependency.
+        
+    Returns:
+        List of signal dictionaries.
+        
+    Raises:
+        HTTPException: If session not found.
+    """
+    try:
+        # Verify session exists
+        session = await session_crud.get_by_id(db=db, session_id=session_id)
+        if session is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Session {session_id} not found",
+            )
+        
+        # Get signals
+        signals = await signal_crud.get_by_session(
+            db=db,
+            session_id=session_id,
+            limit=limit,
+            offset=offset,
+        )
+        
+        # Convert to response format
+        signal_responses = []
+        for signal in signals:
+            signal_responses.append({
+                "id": signal.id,
+                "session_id": signal.session_id,
+                "source": signal.source,
+                "channel": signal.channel,
+                "ts_utc": signal.ts_utc.isoformat() if signal.ts_utc else None,
+                "ts_mono_ns": signal.ts_mono_ns,
+                "value_num": signal.value_num,
+                "value_text": signal.value_text,
+                "unit": signal.unit,
+                "quality": signal.quality,
+            })
+        
+        return signal_responses
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get signals for session {session_id}: {str(e)}",
         )

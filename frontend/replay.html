@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartelem - Data Replay</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .replay-controls {
+            background: #2c3e50;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .time-scrubber {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .time-scrubber input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #34495e;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .time-scrubber input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+        
+        .time-scrubber input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .playback-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .playback-controls button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .playback-controls button:hover {
+            background: #2980b9;
+        }
+        
+        .playback-controls button:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+        }
+        
+        .time-display {
+            color: #ecf0f1;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            min-width: 200px;
+        }
+        
+        .session-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .session-selector select {
+            padding: 0.5rem;
+            border: 1px solid #34495e;
+            border-radius: 4px;
+            background: #2c3e50;
+            color: #ecf0f1;
+        }
+        
+        .loading-indicator {
+            display: none;
+            color: #f39c12;
+            font-size: 0.9rem;
+        }
+        
+        .replay-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-card {
+            background: #34495e;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Cartelem Data Replay</h1>
+            <nav>
+                <a href="index.html">Live Dashboard</a>
+                <a href="replay.html" class="active">Data Replay</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Session Selection -->
+            <div class="replay-controls">
+                <div class="session-selector">
+                    <label for="sessionSelect">Session:</label>
+                    <select id="sessionSelect">
+                        <option value="">Select a session...</option>
+                    </select>
+                    <div class="loading-indicator" id="sessionLoading">Loading sessions...</div>
+                </div>
+                
+                <div class="time-display" id="timeDisplay">
+                    No session selected
+                </div>
+                
+                <div class="playback-controls">
+                    <button id="playPauseBtn" disabled>▶️ Play</button>
+                    <button id="resetBtn" disabled>⏮️ Reset</button>
+                    <button id="exportBtn" disabled>📥 Export</button>
+                </div>
+            </div>
+
+            <!-- Time Scrubber -->
+            <div class="time-scrubber">
+                <input type="range" id="timeSlider" min="0" max="100" value="0" disabled>
+            </div>
+
+            <!-- Replay Statistics -->
+            <div class="replay-stats" id="replayStats" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalSignals">0</div>
+                    <div class="stat-label">Total Signals</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="duration">0s</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="dataSources">0</div>
+                    <div class="stat-label">Data Sources</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="channels">0</div>
+                    <div class="stat-label">Channels</div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <section class="charts-section">
+                <div class="chart-container">
+                    <h3>Speed & RPM</h3>
+                    <canvas id="speedRpmChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Engine Parameters</h3>
+                    <canvas id="engineChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Map Section -->
+            <section class="map-section">
+                <h3>GPS Track</h3>
+                <div id="replayMap" class="map-container"></div>
+            </section>
+
+            <!-- Summary Cards -->
+            <section class="summary-cards">
+                <div class="card">
+                    <h4>GPS Status</h4>
+                    <div class="card-content">
+                        <div class="metric">
+                            <span class="label">Latitude:</span>
+                            <span class="value" id="replayLat">--</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Longitude:</span>
+                            <span class="value" id="replayLon">--</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Speed:</span>
+                            <span class="value" id="replaySpeed">--</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Heading:</span>
+                            <span class="value" id="replayHeading">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h4>Vehicle Status</h4>
+                    <div class="card-content">
+                        <div class="metric">
+                            <span class="label">RPM:</span>
+                            <span class="value" id="replayRpm">--</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Throttle:</span>
+                            <span class="value" id="replayThrottle">--</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Engine Load:</span>
+                            <span class="value" id="replayEngineLoad">--</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Coolant Temp:</span>
+                            <span class="value" id="replayCoolantTemp">--</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/replay.js"></script>
+</body>
+</html>
