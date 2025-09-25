@@ -54,6 +54,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Queue-based architecture with overflow protection and drop counting
   - Comprehensive performance benchmarking and metrics collection
   - Integration with GPS and OBD services for automatic data collection
+- Binary packing utilities (`backend/app/utils/packing.py`) for compact telemetry data:
+  - High-precision scaling for lat/lon (1e7), altitude (1e2), speed (1e2), temperature (1e1)
+  - Support for GPS and OBD field types with configurable scaling factors
+  - Compact binary format: 6 bytes per field (type + field_id + 4-byte scaled value)
+  - Comprehensive validation with range checking and error reporting
+  - Roundtrip packing/unpacking with precision preservation
+  - 33 comprehensive unit tests covering all functionality
+- Meshtastic service (`backend/app/services/meshtastic_service.py`) for 1 Hz frame publishing:
+  - Aggregates last-known values from GPS and OBD services
+  - Publishes compact binary payloads at configurable rate (default 1 Hz)
+  - Payload size optimization with priority-based field reduction
+  - Integration with database writer for frame storage
+  - WebSocket status broadcasting for real-time monitoring
+  - Comprehensive statistics and performance tracking
+- CLI testing tool (`scripts/test_meshtastic.py`) for frame testing:
+  - Packing functionality validation and demonstration
+  - Meshtastic service lifecycle testing
+  - Custom test frame generation and transmission
+  - Comprehensive test data validation and performance metrics
 
 ### Changed
 - Updated FastAPI app to include session routes, WebSocket routes, and service manager integration
@@ -62,6 +81,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - OBD service integration with service manager for real-time automotive data collection
 - GPS and OBD services now send telemetry data to database writer for persistent storage
 - Service manager integrates with database writer for coordinated data collection and storage
+- GPS and OBD services now send telemetry data to Meshtastic service for radio uplink
+- Service manager integrates with Meshtastic service for 1 Hz frame publishing
 
 ### Technical Details
 - Full async/await support throughout the application

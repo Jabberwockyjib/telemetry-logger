@@ -58,6 +58,7 @@ except ImportError:
 
 from ..services.websocket_bus import websocket_bus
 from ..services.db_writer import db_writer, TelemetryData
+from ..services.meshtastic_service import meshtastic_service
 
 logger = logging.getLogger(__name__)
 
@@ -358,6 +359,9 @@ class OBDService:
             quality=quality,
         )
         await db_writer.queue_signal(telemetry_data)
+        
+        # Update Meshtastic service with OBD data
+        meshtastic_service.update_telemetry_data("obd", {pid_name: {"value": value, "unit": final_unit, "quality": quality}})
         
         # Broadcast to WebSocket
         await websocket_bus.broadcast_to_session(self.session_id, ws_data)

@@ -8,6 +8,7 @@ from ..db.crud import session_crud
 from ..db.models import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from .db_writer import db_writer, TelemetryData
+from .meshtastic_service import meshtastic_service
 
 
 class ServiceManager:
@@ -46,7 +47,7 @@ class ServiceManager:
                 if not db_writer.is_running:
                     await db_writer.start()
                 
-                # Start data collection services (stubs for now)
+                # Start data collection services
                 tasks = {
                     "obd_service": asyncio.create_task(self._obd_service_stub(session_id)),
                     "gps_service": asyncio.create_task(self._gps_service_stub(session_id)),
@@ -188,30 +189,26 @@ class ServiceManager:
             raise
     
     async def _meshtastic_service_stub(self, session_id: int) -> None:
-        """Stub Meshtastic uplink service.
+        """Meshtastic uplink service.
         
         Args:
             session_id: ID of the session to uplink data for.
         """
         try:
+            # Start the real Meshtastic service
+            await meshtastic_service.start(session_id)
+            
+            # Keep the service running
             while True:
-                # TODO: Implement actual Meshtastic uplink
-                print(f"Meshtastic service uplinking data for session {session_id}")
-                
-                # Broadcast uplink status via WebSocket
-                from .websocket_bus import websocket_bus
-                uplink_data = {
-                    "source": "meshtastic",
-                    "status": "uplinked",
-                    "packet_size_bytes": 64,
-                    "signal_strength": -85,
-                }
-                await websocket_bus.broadcast_to_session(session_id, uplink_data)
-                
-                await asyncio.sleep(1.0)  # 1 Hz uplink rate
+                await asyncio.sleep(1.0)
                 
         except asyncio.CancelledError:
             print(f"Meshtastic service stopped for session {session_id}")
+            await meshtastic_service.stop()
+            raise
+        except Exception as e:
+            print(f"Meshtastic service error for session {session_id}: {e}")
+            await meshtastic_service.stop()
             raise
     
     async def shutdown(self) -> None:
