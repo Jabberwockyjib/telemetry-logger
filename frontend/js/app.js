@@ -11,6 +11,10 @@ class TelemetryApp {
         this.dataBuffer = new Map();
         this.maxBufferSize = 1000;
         this.startTime = Date.now();
+        this.telemetryRunning = false;
+        this.currentSessionId = null;
+        this.sessionStartTime = null;
+        this.elapsedInterval = null;
         
         // Initialize components
         this.charts = null;
@@ -21,6 +25,9 @@ class TelemetryApp {
         this.disconnect = this.disconnect.bind(this);
         this.handleMessage = this.handleMessage.bind(this);
         this.updateUI = this.updateUI.bind(this);
+        this.startTelemetry = this.startTelemetry.bind(this);
+        this.stopTelemetry = this.stopTelemetry.bind(this);
+        this.updateTelemetryStatus = this.updateTelemetryStatus.bind(this);
         
         // Initialize the app
         this.init();
@@ -39,6 +46,9 @@ class TelemetryApp {
         // Load available sessions
         this.loadSessions();
         
+        // Check telemetry status
+        this.checkTelemetryStatus();
+        
         console.log('Dashboard initialized successfully');
     }
     
@@ -46,6 +56,16 @@ class TelemetryApp {
         // Connection controls
         document.getElementById('connect-btn').addEventListener('click', this.connect);
         document.getElementById('disconnect-btn').addEventListener('click', this.disconnect);
+        
+        // Telemetry controls
+        document.getElementById('start-telemetry-btn').addEventListener('click', this.startTelemetry);
+        document.getElementById('stop-telemetry-btn').addEventListener('click', this.stopTelemetry);
+        
+        // Session creation controls
+        document.getElementById('create-session-btn').addEventListener('click', this.showCreateSessionModal);
+        document.getElementById('modal-close').addEventListener('click', this.hideCreateSessionModal);
+        document.getElementById('cancel-session').addEventListener('click', this.hideCreateSessionModal);
+        document.getElementById('session-form').addEventListener('submit', this.createSession);
         
         // Session selection
         document.getElementById('session-select').addEventListener('change', (e) => {
@@ -91,6 +111,194 @@ class TelemetryApp {
         } catch (error) {
             console.error('Failed to load sessions:', error);
             this.showError('Failed to load sessions. Please refresh the page.');
+        }
+    }
+    
+    async checkTelemetryStatus() {
+        try {
+            const response = await fetch('/api/v1/telemetry/status');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const status = await response.json();
+            this.updateTelemetryUI(status);
+            
+        } catch (error) {
+            console.error('Failed to check telemetry status:', error);
+        }
+    }
+    
+    async startTelemetry() {
+        const startBtn = document.getElementById('start-telemetry-btn');
+        const loading = startBtn.querySelector('.loading');
+        
+        // Show loading state
+        startBtn.disabled = true;
+        loading.style.display = 'inline-block';
+        startBtn.textContent = 'Starting...';
+        
+        try {
+            const response = await fetch('/api/v1/telemetry/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    session_name: `Session ${new Date().toLocaleString()}`
+                })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || `HTTP ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            // Update UI state
+            this.telemetryRunning = true;
+            this.currentSessionId = result.session_id;
+            this.sessionStartTime = new Date();
+            
+            this.updateTelemetryUI({
+                is_running: true,
+                session_id: result.session_id,
+                session_name: result.session_name,
+                start_time: this.sessionStartTime.toISOString()
+            });
+            
+            // Start elapsed time counter
+            this.startElapsedTimer();
+            
+            // Show success message
+            this.showSuccess(`Telemetry started successfully! Session: ${result.session_name}`);
+            
+            // Refresh sessions list
+            this.loadSessions();
+            
+        } catch (error) {
+            console.error('Failed to start telemetry:', error);
+            this.showError(`Failed to start telemetry: ${error.message}`);
+        } finally {
+            // Reset button state
+            startBtn.disabled = false;
+            loading.style.display = 'none';
+            startBtn.textContent = 'Start Telemetry';
+        }
+    }
+    
+    async stopTelemetry() {
+        const stopBtn = document.getElementById('stop-telemetry-btn');
+        const loading = stopBtn.querySelector('.loading');
+        
+        // Show loading state
+        stopBtn.disabled = true;
+        loading.style.display = 'inline-block';
+        stopBtn.textContent = 'Stopping...';
+        
+        try {
+            const response = await fetch('/api/v1/telemetry/stop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || `HTTP ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            // Update UI state
+            this.telemetryRunning = false;
+            this.currentSessionId = null;
+            this.sessionStartTime = null;
+            
+            this.updateTelemetryUI({
+                is_running: false,
+                session_id: null,
+                session_name: null,
+                start_time: null
+            });
+            
+            // Stop elapsed time counter
+            this.stopElapsedTimer();
+            
+            // Show success message
+            this.showSuccess(`Telemetry stopped successfully! Session ${result.session_id} ended.`);
+            
+            // Refresh sessions list
+            this.loadSessions();
+            
+        } catch (error) {
+            console.error('Failed to stop telemetry:', error);
+            this.showError(`Failed to stop telemetry: ${error.message}`);
+        } finally {
+            // Reset button state
+            stopBtn.disabled = false;
+            loading.style.display = 'none';
+            stopBtn.textContent = 'Stop Telemetry';
+        }
+    }
+    
+    updateTelemetryUI(status) {
+        const startBtn = document.getElementById('start-telemetry-btn');
+        const stopBtn = document.getElementById('stop-telemetry-btn');
+        const sessionIdDisplay = document.getElementById('session-id-display');
+        const elapsedTimeDisplay = document.getElementById('elapsed-time-display');
+        
+        if (status.is_running) {
+            // Telemetry is running
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-block';
+            
+            sessionIdDisplay.textContent = `Session ${status.session_id}`;
+            sessionIdDisplay.style.color = '#27ae60';
+            
+            if (status.start_time) {
+                this.sessionStartTime = new Date(status.start_time);
+                this.startElapsedTimer();
+            }
+            
+        } else {
+            // Telemetry is not running
+            startBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+            
+            sessionIdDisplay.textContent = 'No active session';
+            sessionIdDisplay.style.color = '#666';
+            
+            elapsedTimeDisplay.textContent = '';
+            this.stopElapsedTimer();
+        }
+    }
+    
+    startElapsedTimer() {
+        this.stopElapsedTimer(); // Clear any existing timer
+        
+        this.elapsedInterval = setInterval(() => {
+            if (this.sessionStartTime) {
+                const elapsed = Math.floor((Date.now() - this.sessionStartTime.getTime()) / 1000);
+                const hours = Math.floor(elapsed / 3600);
+                const minutes = Math.floor((elapsed % 3600) / 60);
+                const seconds = elapsed % 60;
+                
+                const timeStr = hours > 0 
+                    ? `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+                    : `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                document.getElementById('elapsed-time-display').textContent = timeStr;
+            }
+        }, 1000);
+    }
+    
+    stopElapsedTimer() {
+        if (this.elapsedInterval) {
+            clearInterval(this.elapsedInterval);
+            this.elapsedInterval = null;
         }
     }
     
@@ -383,6 +591,138 @@ class TelemetryApp {
         console.error(message);
         // You could implement a toast notification system here
         alert(message);
+    }
+    
+    // Session Creation Methods
+    showCreateSessionModal() {
+        const modal = document.getElementById('session-modal');
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10);
+        
+        // Focus on the first input
+        document.getElementById('session-name').focus();
+    }
+    
+    hideCreateSessionModal() {
+        const modal = document.getElementById('session-modal');
+        modal.classList.remove('show');
+        setTimeout(() => modal.style.display = 'none', 300);
+        
+        // Reset form
+        document.getElementById('session-form').reset();
+        this.clearFormErrors();
+    }
+    
+    clearFormErrors() {
+        const errorElements = document.querySelectorAll('.form-error');
+        errorElements.forEach(el => {
+            el.classList.remove('show');
+            el.textContent = '';
+        });
+    }
+    
+    showFormError(fieldId, message) {
+        const errorElement = document.getElementById(`${fieldId}-error`);
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+    }
+    
+    async createSession(event) {
+        event.preventDefault();
+        
+        // Clear previous errors
+        this.clearFormErrors();
+        
+        // Get form data
+        const formData = new FormData(event.target);
+        const sessionData = {
+            name: formData.get('name')?.trim(),
+            car_id: formData.get('car_id')?.trim() || null,
+            driver: formData.get('driver')?.trim() || null,
+            track: formData.get('track')?.trim() || null,
+            notes: formData.get('notes')?.trim() || null
+        };
+        
+        // Validate required fields
+        if (!sessionData.name) {
+            this.showFormError('name', 'Session name is required');
+            return;
+        }
+        
+        if (sessionData.name.length > 255) {
+            this.showFormError('name', 'Session name must be 255 characters or less');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = document.getElementById('create-session-submit');
+        const loadingSpan = submitBtn.querySelector('.loading');
+        submitBtn.disabled = true;
+        loadingSpan.style.display = 'inline-block';
+        
+        try {
+            const response = await fetch('/api/v1/sessions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(sessionData)
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || `HTTP ${response.status}`);
+            }
+            
+            const createdSession = await response.json();
+            
+            // Show success message
+            this.showSessionCreatedSuccess(createdSession);
+            
+            // Hide modal
+            this.hideCreateSessionModal();
+            
+            // Update session info display
+            this.updateSessionInfo(createdSession);
+            
+            console.log('Session created successfully:', createdSession);
+            
+        } catch (error) {
+            console.error('Failed to create session:', error);
+            this.showError(`Failed to create session: ${error.message}`);
+        } finally {
+            // Hide loading state
+            submitBtn.disabled = false;
+            loadingSpan.style.display = 'none';
+        }
+    }
+    
+    showSessionCreatedSuccess(session) {
+        const toast = document.getElementById('session-success-toast');
+        const sessionIdSpan = document.getElementById('created-session-id');
+        
+        sessionIdSpan.textContent = session.id;
+        toast.style.display = 'block';
+        toast.classList.add('show');
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.style.display = 'none', 300);
+        }, 5000);
+    }
+    
+    updateSessionInfo(session) {
+        const sessionIdDisplay = document.getElementById('session-id-display');
+        const sessionInfo = document.getElementById('session-info');
+        
+        sessionIdDisplay.textContent = `Session ${session.id}`;
+        sessionInfo.textContent = `${session.name} - ${session.car_id || 'No Car ID'}`;
+        
+        // Update session ID for telemetry controls
+        this.currentSessionId = session.id;
     }
 }
 
