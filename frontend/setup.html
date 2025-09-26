@@ -293,6 +293,72 @@
         .status-warning { background: var(--warning-color); }
         .status-info { background: var(--info-color); }
         
+        .device-scan {
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .device-scan h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .scan-status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .scan-status.success {
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+        
+        .scan-status.error {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+        }
+        
+        .scan-status.info {
+            background: rgba(52, 152, 219, 0.1);
+            border: 1px solid var(--info-color);
+            color: var(--info-color);
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 15px 20px;
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.success {
+            border-color: var(--success-color);
+            background: rgba(46, 204, 113, 0.1);
+        }
+        
+        .toast.error {
+            border-color: var(--error-color);
+            background: rgba(231, 76, 60, 0.1);
+        }
+        
         @media (max-width: 768px) {
             .setup-container {
                 padding: 10px;
@@ -396,6 +462,16 @@
                 <h2>Device Configuration</h2>
                 <p>Configure your GPS, OBD-II, and Meshtastic devices.</p>
                 
+                <!-- Device Scanning -->
+                <div class="device-scan">
+                    <h3>Device Detection</h3>
+                    <button class="btn btn-primary" id="scan-devices-btn">
+                        <span class="loading" style="display: none;"></span>
+                        Scan Devices
+                    </button>
+                    <div id="scan-status" class="scan-status"></div>
+                </div>
+
                 <!-- GPS Configuration -->
                 <div class="device-config" id="gps-config">
                     <h4>

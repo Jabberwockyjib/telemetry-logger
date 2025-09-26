@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Device scanning functionality with fresh port detection
+- Real-time device scanning API endpoint (`/api/v1/devices/scan`)
+- Dynamic port dropdown updates in setup wizard
+- Toast notification system for user feedback
+- Comprehensive device scanning tests
 - GPS service (`backend/app/services/gps_service.py`) with NMEA parsing capabilities:
   - Reads NMEA data from configurable serial ports with automatic reconnection and backoff logic
   - Parses GGA (Global Positioning System Fix Data), RMC (Recommended Minimum Navigation Information), and VTG (Track Made Good and Ground Speed) sentences
@@ -105,6 +110,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Error handling and edge case testing
   - Filter validation and parameter testing
   - Large dataset pagination testing
+
+### Fixed
+- Device setup wizard "Scan devices" button now works correctly
+- Port dropdowns update dynamically when scanning for devices
+- Preserves user selections when ports are rescanned
+- Handles empty device lists gracefully
+- Shows loading states and success/error feedback
 
 ### Changed
 - Updated FastAPI app to include session routes, WebSocket routes, export routes, and service manager integration

@@ -14,6 +14,11 @@ class SetupWizard {
             meshtastic: { enabled: false, config: {} }
         };
         this.testResults = {};
+        this.isScanning = false;
+        this.lastScanResults = {
+            serial_ports: [],
+            cameras: []
+        };
         
         this.init();
     }
@@ -43,6 +48,9 @@ class SetupWizard {
         
         // Test button
         document.getElementById('start-test').addEventListener('click', () => this.startDeviceTest());
+        
+        // Device scanning button
+        document.getElementById('scan-devices-btn').addEventListener('click', () => this.scanDevices());
         
         // Step indicators
         document.querySelectorAll('.step').forEach(step => {
@@ -212,6 +220,67 @@ class SetupWizard {
         }
     }
     
+    async scanDevices() {
+        if (this.isScanning) return;
+        
+        this.isScanning = true;
+        const scanBtn = document.getElementById('scan-devices-btn');
+        const loading = scanBtn.querySelector('.loading');
+        const scanStatus = document.getElementById('scan-status');
+        
+        // Show scanning state
+        scanBtn.disabled = true;
+        loading.style.display = 'inline-block';
+        scanBtn.textContent = 'Scanning...';
+        scanStatus.style.display = 'block';
+        scanStatus.className = 'scan-status info';
+        scanStatus.textContent = 'Scanning for devices...';
+        
+        try {
+            const response = await fetch('/api/v1/devices/scan');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const data = await response.json();
+            this.lastScanResults = data;
+            
+            // Update port dropdowns
+            this.populatePortSelects(data.serial_ports);
+            
+            // Show success status
+            scanStatus.className = 'scan-status success';
+            scanStatus.textContent = `Found ${data.serial_ports.length} serial ports, ${data.cameras.length} cameras`;
+            
+            // Show success toast
+            this.showToast('Ports updated', 'success');
+            
+            // Log results
+            console.log('Device scan results:', data);
+            
+        } catch (error) {
+            console.error('Error scanning devices:', error);
+            
+            // Show error status
+            scanStatus.className = 'scan-status error';
+            scanStatus.textContent = 'Failed to scan devices';
+            
+            // Show error toast
+            this.showToast('Device scan failed', 'error');
+            
+        } finally {
+            // Reset button state
+            scanBtn.disabled = false;
+            loading.style.display = 'none';
+            scanBtn.textContent = 'Scan Devices';
+            
+            // Hide status after 5 seconds
+            setTimeout(() => {
+                scanStatus.style.display = 'none';
+            }, 5000);
+            
+            this.isScanning = false;
+        }
+    }
+    
     populatePortSelects(ports) {
         const portSelects = ['gps-port', 'obd-port', 'meshtastic-port'];
         
@@ -222,16 +291,30 @@ class SetupWizard {
             // Clear existing options except the first one
             select.innerHTML = '<option value="">Select port...</option>';
             
-            ports.forEach(port => {
+            if (ports.length === 0) {
                 const option = document.createElement('option');
-                option.value = port.device;
-                option.textContent = `${port.device} - ${port.description}`;
+                option.value = '';
+                option.textContent = 'No devices detected';
+                option.disabled = true;
                 select.appendChild(option);
-            });
+            } else {
+                ports.forEach(port => {
+                    const option = document.createElement('option');
+                    option.value = port.path || port.device;
+                    option.textContent = `${port.path || port.device} - ${port.desc || port.description || 'Unknown device'}`;
+                    select.appendChild(option);
+                });
+            }
             
             // Restore previous selection if it still exists
             if (currentValue) {
-                select.value = currentValue;
+                const optionExists = Array.from(select.options).some(option => option.value === currentValue);
+                if (optionExists) {
+                    select.value = currentValue;
+                } else if (ports.length > 0) {
+                    // Select first available option if previous selection is no longer valid
+                    select.selectedIndex = 1; // Skip the "Select port..." option
+                }
             }
         });
     }
@@ -711,6 +794,27 @@ class SetupWizard {
         // Hide after 3 seconds
         setTimeout(() => {
             successDiv.style.display = 'none';
+        }, 3000);
+    }
+    
+    showToast(message, type = 'info') {
+        // Remove existing toasts
+        document.querySelectorAll('.toast').forEach(toast => toast.remove());
+        
+        // Create new toast
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        // Show toast
+        setTimeout(() => toast.classList.add('show'), 100);
+        
+        // Hide toast after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
 }
