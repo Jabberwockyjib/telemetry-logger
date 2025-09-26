@@ -7,6 +7,8 @@ from typing import Dict, Optional, Set
 from ..db.crud import session_crud
 from ..db.models import Session
 from sqlalchemy.ext.asyncio import AsyncSession
+from .db_writer import db_writer, TelemetryData
+from .meshtastic_service import meshtastic_service
 
 
 class ServiceManager:
@@ -41,7 +43,11 @@ class ServiceManager:
                 return False
             
             try:
-                # Start data collection services (stubs for now)
+                # Start database writer if not already running
+                if not db_writer.is_running:
+                    await db_writer.start()
+                
+                # Start data collection services
                 tasks = {
                     "obd_service": asyncio.create_task(self._obd_service_stub(session_id)),
                     "gps_service": asyncio.create_task(self._gps_service_stub(session_id)),
@@ -126,19 +132,31 @@ class ServiceManager:
             del self._service_tasks[session_id]
     
     async def _obd_service_stub(self, session_id: int) -> None:
-        """Stub OBD-II data collection service.
+        """OBD-II data collection service.
         
         Args:
             session_id: ID of the session to collect data for.
         """
         try:
+            from .obd_service import OBDService
+            
+            # Create and start OBD service
+            obd_service = OBDService()
+            await obd_service.start(session_id)
+            
+            # Keep the service running
             while True:
-                # TODO: Implement actual OBD-II data collection
-                print(f"OBD service collecting data for session {session_id}")
-                await asyncio.sleep(0.1)  # 10 Hz collection rate
+                await asyncio.sleep(1.0)
                 
         except asyncio.CancelledError:
             print(f"OBD service stopped for session {session_id}")
+            if 'obd_service' in locals():
+                await obd_service.stop()
+            raise
+        except Exception as e:
+            print(f"OBD service error for session {session_id}: {e}")
+            if 'obd_service' in locals():
+                await obd_service.stop()
             raise
     
     async def _gps_service_stub(self, session_id: int) -> None:
@@ -151,6 +169,19 @@ class ServiceManager:
             while True:
                 # TODO: Implement actual GPS data collection
                 print(f"GPS service collecting data for session {session_id}")
+                
+                # Broadcast stub data via WebSocket
+                from .websocket_bus import websocket_bus
+                stub_data = {
+                    "source": "gps",
+                    "latitude": 37.7749,
+                    "longitude": -122.4194,
+                    "altitude_m": 10.0,
+                    "speed_kph": 65.0,
+                    "heading_deg": 45.0,
+                }
+                await websocket_bus.broadcast_to_session(session_id, stub_data)
+                
                 await asyncio.sleep(0.1)  # 10 Hz collection rate
                 
         except asyncio.CancelledError:
@@ -158,19 +189,26 @@ class ServiceManager:
             raise
     
     async def _meshtastic_service_stub(self, session_id: int) -> None:
-        """Stub Meshtastic uplink service.
+        """Meshtastic uplink service.
         
         Args:
             session_id: ID of the session to uplink data for.
         """
         try:
+            # Start the real Meshtastic service
+            await meshtastic_service.start(session_id)
+            
+            # Keep the service running
             while True:
-                # TODO: Implement actual Meshtastic uplink
-                print(f"Meshtastic service uplinking data for session {session_id}")
-                await asyncio.sleep(1.0)  # 1 Hz uplink rate
+                await asyncio.sleep(1.0)
                 
         except asyncio.CancelledError:
             print(f"Meshtastic service stopped for session {session_id}")
+            await meshtastic_service.stop()
+            raise
+        except Exception as e:
+            print(f"Meshtastic service error for session {session_id}: {e}")
+            await meshtastic_service.stop()
             raise
     
     async def shutdown(self) -> None:
@@ -183,6 +221,10 @@ class ServiceManager:
             
             self._active_sessions.clear()
             self._service_tasks.clear()
+            
+            # Stop database writer
+            if db_writer.is_running:
+                await db_writer.stop()
 
 
 # Global service manager instance

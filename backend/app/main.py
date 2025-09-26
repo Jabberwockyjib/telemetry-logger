@@ -5,9 +5,12 @@ from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from .api.routes_health import router as health_router
 from .api.routes_sessions import router as sessions_router
+from .api.routes_ws import router as ws_router
+from .api.routes_export import router as export_router
 from .config import settings
 
 
@@ -26,7 +29,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
     # Shutdown
     from .services.manager import service_manager
+    from .services.websocket_bus import websocket_bus
     await service_manager.shutdown()
+    await websocket_bus.shutdown()
 
 
 def create_app() -> FastAPI:
@@ -57,6 +62,11 @@ def create_app() -> FastAPI:
     # Mount API routes
     app.include_router(health_router, prefix="/api/v1", tags=["health"])
     app.include_router(sessions_router, prefix="/api/v1", tags=["sessions"])
+    app.include_router(ws_router, prefix="/api/v1", tags=["websocket"])
+    app.include_router(export_router, prefix="/api/v1", tags=["export"])
+    
+    # Mount static files for frontend
+    app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
     
     return app
 

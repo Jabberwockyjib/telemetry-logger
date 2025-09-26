@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartelem Telemetry Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Cartelem Telemetry Dashboard</h1>
+            <div class="status-indicator">
+                <span id="connection-status" class="status-disconnected">Disconnected</span>
+                <span id="session-info" class="session-info"></span>
+            </div>
+        </header>
+
+        <!-- Summary Cards -->
+        <section class="summary-cards">
+            <div class="card">
+                <h3>GPS Status</h3>
+                <div class="metric">
+                    <span class="value" id="gps-latitude">--</span>
+                    <span class="unit">°N</span>
+                </div>
+                <div class="metric">
+                    <span class="value" id="gps-longitude">--</span>
+                    <span class="unit">°W</span>
+                </div>
+                <div class="metric">
+                    <span class="value" id="gps-speed">--</span>
+                    <span class="unit">km/h</span>
+                </div>
+                <div class="metric">
+                    <span class="value" id="gps-satellites">--</span>
+                    <span class="unit">sats</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Vehicle Status</h3>
+                <div class="metric">
+                    <span class="value" id="obd-speed">--</span>
+                    <span class="unit">km/h</span>
+                </div>
+                <div class="metric">
+                    <span class="value" id="obd-rpm">--</span>
+                    <span class="unit">RPM</span>
+                </div>
+                <div class="metric">
+                    <span class="value" id="obd-throttle">--</span>
+                    <span class="unit">%</span>
+                </div>
+                <div class="metric">
+                    <span class="value" id="obd-engine-load">--</span>
+                    <span class="unit">%</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Engine Status</h3>
+                <div class="metric">
+                    <span class="value" id="obd-coolant-temp">--</span>
+                    <span class="unit">°C</span>
+                </div>
+                <div class="metric">
+                    <span class="value" id="obd-fuel-level">--</span>
+                    <span class="unit">%</span>
+                </div>
+                <div class="metric">
+                    <span class="value" id="obd-intake-temp">--</span>
+                    <span class="unit">°C</span>
+                </div>
+                <div class="metric">
+                    <span class="value" id="obd-maf">--</span>
+                    <span class="unit">g/s</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>System Status</h3>
+                <div class="metric">
+                    <span class="value" id="meshtastic-frames">--</span>
+                    <span class="unit">frames</span>
+                </div>
+                <div class="metric">
+                    <span class="value" id="meshtastic-bytes">--</span>
+                    <span class="unit">bytes</span>
+                </div>
+                <div class="metric">
+                    <span class="value" id="db-signals">--</span>
+                    <span class="unit">signals</span>
+                </div>
+                <div class="metric">
+                    <span class="value" id="uptime">--</span>
+                    <span class="unit">min</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section">
+            <div class="chart-container">
+                <h3>Speed & RPM</h3>
+                <canvas id="speed-rpm-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Engine Parameters</h3>
+                <canvas id="engine-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Map Section -->
+        <section class="map-section">
+            <div class="map-container">
+                <h3>Live GPS Track</h3>
+                <div id="map"></div>
+            </div>
+        </section>
+
+        <!-- Controls -->
+        <section class="controls">
+            <div class="control-group">
+                <label for="session-select">Session:</label>
+                <select id="session-select">
+                    <option value="">Select a session...</option>
+                </select>
+                <button id="connect-btn" class="btn btn-primary">Connect</button>
+                <button id="disconnect-btn" class="btn btn-secondary" disabled>Disconnect</button>
+            </div>
+            <div class="control-group">
+                <label for="chart-range">Chart Range:</label>
+                <select id="chart-range">
+                    <option value="60">1 minute</option>
+                    <option value="300" selected>5 minutes</option>
+                    <option value="600">10 minutes</option>
+                    <option value="1800">30 minutes</option>
+                </select>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/map.js"></script>
+</body>
+</html>

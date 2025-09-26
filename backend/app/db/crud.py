@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -184,6 +184,54 @@ class SignalCRUD:
             .limit(limit)
         )
         return result.scalars().all()
+    
+    @staticmethod
+    async def get_signals_paginated(
+        db: AsyncSession,
+        session_id: int,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None,
+        sources: Optional[List[str]] = None,
+        channels: Optional[List[str]] = None,
+        limit: int = 1000,
+        offset: int = 0,
+    ) -> List[Signal]:
+        """Get signals with pagination and filtering.
+        
+        Args:
+            db: Database session.
+            session_id: Session ID to filter by.
+            start_time: Optional start time filter.
+            end_time: Optional end time filter.
+            sources: Optional list of sources to filter by.
+            channels: Optional list of channels to filter by.
+            limit: Maximum number of signals to return.
+            offset: Number of signals to skip.
+            
+        Returns:
+            List of signals matching the criteria.
+        """
+        query = select(Signal).where(Signal.session_id == session_id)
+        
+        # Add time filters
+        if start_time:
+            query = query.where(Signal.ts_utc >= start_time)
+        if end_time:
+            query = query.where(Signal.ts_utc <= end_time)
+        
+        # Add source filters
+        if sources:
+            query = query.where(Signal.source.in_(sources))
+        
+        # Add channel filters
+        if channels:
+            query = query.where(Signal.channel.in_(channels))
+        
+        # Add ordering and pagination
+        query = query.order_by(Signal.ts_utc.asc()).limit(limit).offset(offset)
+        
+        result = await db.execute(query)
+        return result.scalars().all()
 
 
 class FrameCRUD:
@@ -247,6 +295,42 @@ class FrameCRUD:
             .limit(limit)
             .offset(offset)
         )
+        return result.scalars().all()
+    
+    @staticmethod
+    async def get_frames_paginated(
+        db: AsyncSession,
+        session_id: int,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None,
+        limit: int = 1000,
+        offset: int = 0,
+    ) -> List[Frame]:
+        """Get frames with pagination and filtering.
+        
+        Args:
+            db: Database session.
+            session_id: Session ID to filter by.
+            start_time: Optional start time filter.
+            end_time: Optional end time filter.
+            limit: Maximum number of frames to return.
+            offset: Number of frames to skip.
+            
+        Returns:
+            List of frames matching the criteria.
+        """
+        query = select(Frame).where(Frame.session_id == session_id)
+        
+        # Add time filters
+        if start_time:
+            query = query.where(Frame.ts_utc >= start_time)
+        if end_time:
+            query = query.where(Frame.ts_utc <= end_time)
+        
+        # Add ordering and pagination
+        query = query.order_by(Frame.ts_utc.asc()).limit(limit).offset(offset)
+        
+        result = await db.execute(query)
         return result.scalars().all()
 
 
