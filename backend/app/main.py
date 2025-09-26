@@ -11,6 +11,7 @@ from .api.routes_health import router as health_router
 from .api.routes_sessions import router as sessions_router
 from .api.routes_ws import router as ws_router
 from .api.routes_export import router as export_router
+from .api.routes_setup import router as setup_router
 from .config import settings
 
 
@@ -64,6 +65,7 @@ def create_app() -> FastAPI:
     app.include_router(sessions_router, prefix="/api/v1", tags=["sessions"])
     app.include_router(ws_router, prefix="/api/v1", tags=["websocket"])
     app.include_router(export_router, prefix="/api/v1", tags=["export"])
+    app.include_router(setup_router, prefix="/api/v1", tags=["setup"])
     
     # Mount static files for frontend
     app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
