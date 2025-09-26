@@ -421,83 +421,178 @@ class ServiceManager:
             logger.error(f"Meshtastic service error for session {session_id}: {e}")
     
     async def _obd_service_stub(self, session_id: int) -> None:
-        """OBD-II data collection service.
+        """OBD-II data collection service stub with mock data.
         
         Args:
             session_id: ID of the session to collect data for.
         """
         try:
-            from .obd_service import OBDService
+            import random
+            from .websocket_bus import websocket_bus
             
-            # Create and start OBD service
-            obd_service = OBDService()
-            await obd_service.start(session_id)
+            logger.info(f"Starting OBD service stub for session {session_id}")
             
-            # Keep the service running
+            # Mock OBD data
+            obd_pids = {
+                'SPEED': {'min': 0, 'max': 120, 'unit': 'km/h'},
+                'RPM': {'min': 800, 'max': 6000, 'unit': 'RPM'},
+                'THROTTLE_POS': {'min': 0, 'max': 100, 'unit': '%'},
+                'ENGINE_LOAD': {'min': 0, 'max': 100, 'unit': '%'},
+                'COOLANT_TEMP': {'min': 80, 'max': 105, 'unit': '°C'},
+                'FUEL_LEVEL': {'min': 10, 'max': 100, 'unit': '%'},
+                'INTAKE_TEMP': {'min': 20, 'max': 50, 'unit': '°C'},
+                'MAF': {'min': 2, 'max': 15, 'unit': 'g/s'}
+            }
+            
             while True:
-                await asyncio.sleep(1.0)
+                # Generate mock OBD data
+                for pid_name, config in obd_pids.items():
+                    value = random.uniform(config['min'], config['max'])
+                    
+                    # Add some realistic variation
+                    if pid_name == 'SPEED':
+                        value = max(0, value + random.uniform(-5, 5))
+                    elif pid_name == 'RPM':
+                        value = max(800, value + random.uniform(-200, 200))
+                    elif pid_name == 'THROTTLE_POS':
+                        value = max(0, min(100, value + random.uniform(-10, 10)))
+                    
+                    # Broadcast OBD data
+                    obd_data = {
+                        "source": "obd",
+                        "pid": pid_name,
+                        "value": round(value, 1),
+                        "unit": config['unit'],
+                        "quality": "good",
+                        "description": f"Mock {pid_name} data"
+                    }
+                    await websocket_bus.broadcast_to_session(session_id, obd_data)
+                
+                await asyncio.sleep(0.5)  # 2 Hz collection rate
                 
         except asyncio.CancelledError:
-            print(f"OBD service stopped for session {session_id}")
-            if 'obd_service' in locals():
-                await obd_service.stop()
+            logger.info(f"OBD service stub stopped for session {session_id}")
             raise
         except Exception as e:
-            print(f"OBD service error for session {session_id}: {e}")
-            if 'obd_service' in locals():
-                await obd_service.stop()
+            logger.error(f"OBD service stub error for session {session_id}: {e}")
             raise
     
     async def _gps_service_stub(self, session_id: int) -> None:
-        """Stub GPS data collection service.
+        """GPS data collection service stub with mock data.
         
         Args:
             session_id: ID of the session to collect data for.
         """
         try:
+            import random
+            from .websocket_bus import websocket_bus
+            
+            logger.info(f"Starting GPS service stub for session {session_id}")
+            
+            # Starting position (San Francisco)
+            base_lat = 37.7749
+            base_lon = -122.4194
+            base_alt = 10.0
+            
+            # Simulate movement
+            lat_offset = 0.0
+            lon_offset = 0.0
+            speed = 0.0
+            heading = 0.0
+            
             while True:
-                # TODO: Implement actual GPS data collection
-                print(f"GPS service collecting data for session {session_id}")
+                # Simulate realistic GPS movement
+                speed = max(0, speed + random.uniform(-5, 5))
+                speed = min(120, speed)  # Cap at 120 km/h
                 
-                # Broadcast stub data via WebSocket
-                from .websocket_bus import websocket_bus
-                stub_data = {
+                heading = (heading + random.uniform(-10, 10)) % 360
+                
+                # Calculate position change based on speed and heading
+                if speed > 0:
+                    # Convert speed (km/h) to degrees per second (rough approximation)
+                    speed_deg_per_sec = speed / 111000.0  # 1 degree ≈ 111km
+                    
+                    # Calculate lat/lon changes
+                    lat_change = speed_deg_per_sec * random.uniform(0.8, 1.2) * 0.1
+                    lon_change = speed_deg_per_sec * random.uniform(0.8, 1.2) * 0.1
+                    
+                    lat_offset += lat_change * random.uniform(-1, 1)
+                    lon_offset += lon_change * random.uniform(-1, 1)
+                
+                # Add some noise
+                lat_noise = random.uniform(-0.0001, 0.0001)
+                lon_noise = random.uniform(-0.0001, 0.0001)
+                alt_noise = random.uniform(-2, 2)
+                
+                # Calculate final position
+                current_lat = base_lat + lat_offset + lat_noise
+                current_lon = base_lon + lon_offset + lon_noise
+                current_alt = base_alt + alt_noise
+                
+                # Generate satellite count
+                satellites = random.randint(8, 12)
+                
+                # Broadcast GPS data
+                gps_data = {
                     "source": "gps",
-                    "latitude": 37.7749,
-                    "longitude": -122.4194,
-                    "altitude_m": 10.0,
-                    "speed_kph": 65.0,
-                    "heading_deg": 45.0,
+                    "latitude": round(current_lat, 6),
+                    "longitude": round(current_lon, 6),
+                    "altitude_m": round(current_alt, 1),
+                    "speed_kph": round(speed, 1),
+                    "heading_deg": round(heading, 1),
+                    "satellites": satellites,
+                    "quality": "good"
                 }
-                await websocket_bus.broadcast_to_session(session_id, stub_data)
+                await websocket_bus.broadcast_to_session(session_id, gps_data)
                 
                 await asyncio.sleep(0.1)  # 10 Hz collection rate
                 
         except asyncio.CancelledError:
-            print(f"GPS service stopped for session {session_id}")
+            logger.info(f"GPS service stub stopped for session {session_id}")
+            raise
+        except Exception as e:
+            logger.error(f"GPS service stub error for session {session_id}: {e}")
             raise
     
     async def _meshtastic_service_stub(self, session_id: int) -> None:
-        """Meshtastic uplink service.
+        """Meshtastic uplink service stub with mock data.
         
         Args:
             session_id: ID of the session to uplink data for.
         """
         try:
-            # Start the real Meshtastic service
-            await meshtastic_service.start(session_id)
+            import random
+            from .websocket_bus import websocket_bus
             
-            # Keep the service running
+            logger.info(f"Starting Meshtastic service stub for session {session_id}")
+            
+            frames_published = 0
+            bytes_transmitted = 0
+            
             while True:
-                await asyncio.sleep(1.0)
+                # Simulate frame publishing
+                frames_published += 1
+                payload_size = random.randint(32, 64)
+                bytes_transmitted += payload_size
+                
+                # Broadcast Meshtastic status
+                meshtastic_data = {
+                    "source": "meshtastic",
+                    "frames_published": frames_published,
+                    "bytes_transmitted": bytes_transmitted,
+                    "payload_size": payload_size,
+                    "quality": "good",
+                    "status": "transmitting"
+                }
+                await websocket_bus.broadcast_to_session(session_id, meshtastic_data)
+                
+                await asyncio.sleep(1.0)  # 1 Hz publishing rate
                 
         except asyncio.CancelledError:
-            print(f"Meshtastic service stopped for session {session_id}")
-            await meshtastic_service.stop()
+            logger.info(f"Meshtastic service stub stopped for session {session_id}")
             raise
         except Exception as e:
-            print(f"Meshtastic service error for session {session_id}: {e}")
-            await meshtastic_service.stop()
+            logger.error(f"Meshtastic service stub error for session {session_id}: {e}")
             raise
     
     async def shutdown(self) -> None:

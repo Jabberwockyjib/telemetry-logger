@@ -174,6 +174,10 @@ class TelemetryApp {
             // Start elapsed time counter
             this.startElapsedTimer();
             
+            // Connect to WebSocket for live data
+            this.sessionId = result.session_id;
+            this.connect();
+            
             // Show success message
             this.showSuccess(`Telemetry started successfully! Session: ${result.session_name}`);
             
@@ -229,6 +233,9 @@ class TelemetryApp {
             
             // Stop elapsed time counter
             this.stopElapsedTimer();
+            
+            // Disconnect from WebSocket
+            this.disconnect();
             
             // Show success message
             this.showSuccess(`Telemetry stopped successfully! Session ${result.session_id} ended.`);
@@ -374,6 +381,9 @@ class TelemetryApp {
         this.updateConnectionStatus(false);
         this.sessionId = null;
         
+        // Hide data flow indicator
+        this.hideDataFlowIndicator();
+        
         // Clear data
         this.dataBuffer.clear();
         this.charts.clear();
@@ -409,6 +419,9 @@ class TelemetryApp {
     
     processTelemetryData(message) {
         const { session_id, timestamp, data } = message;
+        
+        // Show data flow indicator
+        this.showDataFlowIndicator();
         
         // Store data in buffer
         const key = `${data.source}_${data.pid || 'data'}`;
@@ -530,24 +543,17 @@ class TelemetryApp {
     updateConnectionStatus(connected) {
         const statusElement = document.getElementById('connection-status');
         const sessionInfoElement = document.getElementById('session-info');
-        const connectBtn = document.getElementById('connect-btn');
-        const disconnectBtn = document.getElementById('disconnect-btn');
-        const sessionSelect = document.getElementById('session-select');
         
         if (connected) {
             statusElement.textContent = 'Connected';
             statusElement.className = 'status-connected';
-            sessionInfoElement.textContent = `Session: ${this.sessionId}`;
-            connectBtn.disabled = true;
-            disconnectBtn.disabled = false;
-            sessionSelect.disabled = true;
+            if (this.sessionId) {
+                sessionInfoElement.textContent = `Session: ${this.sessionId}`;
+            }
         } else {
             statusElement.textContent = 'Disconnected';
             statusElement.className = 'status-disconnected';
             sessionInfoElement.textContent = '';
-            connectBtn.disabled = false;
-            disconnectBtn.disabled = true;
-            sessionSelect.disabled = false;
         }
     }
     
@@ -594,6 +600,20 @@ class TelemetryApp {
         console.error(message);
         // You could implement a toast notification system here
         alert(message);
+    }
+    
+    showDataFlowIndicator() {
+        const indicator = document.getElementById('data-flow-indicator');
+        if (indicator) {
+            indicator.style.display = 'flex';
+        }
+    }
+    
+    hideDataFlowIndicator() {
+        const indicator = document.getElementById('data-flow-indicator');
+        if (indicator) {
+            indicator.style.display = 'none';
+        }
     }
     
     // Session Creation Methods
