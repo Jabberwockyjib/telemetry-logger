@@ -113,36 +113,49 @@ Open your web browser and navigate to:
 
 ## 📊 Using Cartelem
 
-### 1. Create a Session
+### 1. Quick Start - One-Click Telemetry
 1. Open the **Live Dashboard**
-2. Click **"Create New Session"**
-3. Enter session details:
-   - Session name (e.g., "Track Day 1")
-   - Car ID (e.g., "CAR001")
-   - Driver name
-   - Track/location
-4. Click **"Create Session"**
+2. Click **"Start Telemetry"** button
+3. The system will:
+   - Create a new session automatically
+   - Start all configured data services
+   - Begin collecting telemetry data
+4. Monitor the session status and elapsed time
 
-### 2. Start Data Collection
-1. Select your session from the dropdown
-2. Click **"Start Session"**
-3. Verify data is flowing:
-   - GPS coordinates updating on map
-   - Charts showing real-time data
-   - Status indicators showing "Connected"
-
-### 3. Monitor Real-time Data
+### 2. Monitor Real-time Data
 - **GPS Map**: Real-time position tracking
 - **Speed/RPM Chart**: Engine performance data
 - **Engine Parameters**: Temperature, load, throttle
 - **Status Cards**: Connection status for each service
+- **Session Info**: Current session ID and elapsed time
 
-### 4. Stop and Export Data
-1. Click **"Stop Session"** when complete
-2. Navigate to **"Data Replay"** page
-3. Select your session
-4. Use time scrubber to review data
-5. Click **"Export CSV"** or **"Export Parquet"**
+### 3. Stop Telemetry
+1. Click **"Stop Telemetry"** button when complete
+2. The system will:
+   - Gracefully stop all data services
+   - Finalize the session
+   - Save all collected data
+
+### 4. Review and Export Data
+1. Navigate to **"Data Replay"** page
+2. Select your session
+3. Use time scrubber to review data
+4. Click **"Export CSV"** or **"Export Parquet"**
+
+### 5. Advanced - Manual Session Management
+For more control, you can manually create and manage sessions:
+
+1. **Create Session Manually**:
+   - Click **"Create New Session"**
+   - Enter session details (name, car ID, driver, track)
+   - Click **"Create Session"**
+
+2. **Start Specific Session**:
+   - Select session from dropdown
+   - Click **"Start Session"**
+
+3. **Stop Session**:
+   - Click **"Stop Session"** to end data collection
 
 ## 🔧 Troubleshooting
 
