@@ -27,7 +27,10 @@ class TelemetryApp {
         this.updateUI = this.updateUI.bind(this);
         this.startTelemetry = this.startTelemetry.bind(this);
         this.stopTelemetry = this.stopTelemetry.bind(this);
-        this.updateTelemetryStatus = this.updateTelemetryStatus.bind(this);
+        this.updateTelemetryUI = this.updateTelemetryUI.bind(this);
+        this.showCreateSessionModal = this.showCreateSessionModal.bind(this);
+        this.hideCreateSessionModal = this.hideCreateSessionModal.bind(this);
+        this.createSession = this.createSession.bind(this);
         
         // Initialize the app
         this.init();
