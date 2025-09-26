@@ -11,6 +11,10 @@ class TelemetryApp {
         this.dataBuffer = new Map();
         this.maxBufferSize = 1000;
         this.startTime = Date.now();
+        this.telemetryRunning = false;
+        this.currentSessionId = null;
+        this.sessionStartTime = null;
+        this.elapsedInterval = null;
         
         // Initialize components
         this.charts = null;
@@ -21,6 +25,9 @@ class TelemetryApp {
         this.disconnect = this.disconnect.bind(this);
         this.handleMessage = this.handleMessage.bind(this);
         this.updateUI = this.updateUI.bind(this);
+        this.startTelemetry = this.startTelemetry.bind(this);
+        this.stopTelemetry = this.stopTelemetry.bind(this);
+        this.updateTelemetryStatus = this.updateTelemetryStatus.bind(this);
         
         // Initialize the app
         this.init();
@@ -39,6 +46,9 @@ class TelemetryApp {
         // Load available sessions
         this.loadSessions();
         
+        // Check telemetry status
+        this.checkTelemetryStatus();
+        
         console.log('Dashboard initialized successfully');
     }
     
@@ -46,6 +56,10 @@ class TelemetryApp {
         // Connection controls
         document.getElementById('connect-btn').addEventListener('click', this.connect);
         document.getElementById('disconnect-btn').addEventListener('click', this.disconnect);
+        
+        // Telemetry controls
+        document.getElementById('start-telemetry-btn').addEventListener('click', this.startTelemetry);
+        document.getElementById('stop-telemetry-btn').addEventListener('click', this.stopTelemetry);
         
         // Session selection
         document.getElementById('session-select').addEventListener('change', (e) => {
@@ -91,6 +105,194 @@ class TelemetryApp {
         } catch (error) {
             console.error('Failed to load sessions:', error);
             this.showError('Failed to load sessions. Please refresh the page.');
+        }
+    }
+    
+    async checkTelemetryStatus() {
+        try {
+            const response = await fetch('/api/v1/telemetry/status');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const status = await response.json();
+            this.updateTelemetryUI(status);
+            
+        } catch (error) {
+            console.error('Failed to check telemetry status:', error);
+        }
+    }
+    
+    async startTelemetry() {
+        const startBtn = document.getElementById('start-telemetry-btn');
+        const loading = startBtn.querySelector('.loading');
+        
+        // Show loading state
+        startBtn.disabled = true;
+        loading.style.display = 'inline-block';
+        startBtn.textContent = 'Starting...';
+        
+        try {
+            const response = await fetch('/api/v1/telemetry/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    session_name: `Session ${new Date().toLocaleString()}`
+                })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || `HTTP ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            // Update UI state
+            this.telemetryRunning = true;
+            this.currentSessionId = result.session_id;
+            this.sessionStartTime = new Date();
+            
+            this.updateTelemetryUI({
+                is_running: true,
+                session_id: result.session_id,
+                session_name: result.session_name,
+                start_time: this.sessionStartTime.toISOString()
+            });
+            
+            // Start elapsed time counter
+            this.startElapsedTimer();
+            
+            // Show success message
+            this.showSuccess(`Telemetry started successfully! Session: ${result.session_name}`);
+            
+            // Refresh sessions list
+            this.loadSessions();
+            
+        } catch (error) {
+            console.error('Failed to start telemetry:', error);
+            this.showError(`Failed to start telemetry: ${error.message}`);
+        } finally {
+            // Reset button state
+            startBtn.disabled = false;
+            loading.style.display = 'none';
+            startBtn.textContent = 'Start Telemetry';
+        }
+    }
+    
+    async stopTelemetry() {
+        const stopBtn = document.getElementById('stop-telemetry-btn');
+        const loading = stopBtn.querySelector('.loading');
+        
+        // Show loading state
+        stopBtn.disabled = true;
+        loading.style.display = 'inline-block';
+        stopBtn.textContent = 'Stopping...';
+        
+        try {
+            const response = await fetch('/api/v1/telemetry/stop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || `HTTP ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            // Update UI state
+            this.telemetryRunning = false;
+            this.currentSessionId = null;
+            this.sessionStartTime = null;
+            
+            this.updateTelemetryUI({
+                is_running: false,
+                session_id: null,
+                session_name: null,
+                start_time: null
+            });
+            
+            // Stop elapsed time counter
+            this.stopElapsedTimer();
+            
+            // Show success message
+            this.showSuccess(`Telemetry stopped successfully! Session ${result.session_id} ended.`);
+            
+            // Refresh sessions list
+            this.loadSessions();
+            
+        } catch (error) {
+            console.error('Failed to stop telemetry:', error);
+            this.showError(`Failed to stop telemetry: ${error.message}`);
+        } finally {
+            // Reset button state
+            stopBtn.disabled = false;
+            loading.style.display = 'none';
+            stopBtn.textContent = 'Stop Telemetry';
+        }
+    }
+    
+    updateTelemetryUI(status) {
+        const startBtn = document.getElementById('start-telemetry-btn');
+        const stopBtn = document.getElementById('stop-telemetry-btn');
+        const sessionIdDisplay = document.getElementById('session-id-display');
+        const elapsedTimeDisplay = document.getElementById('elapsed-time-display');
+        
+        if (status.is_running) {
+            // Telemetry is running
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-block';
+            
+            sessionIdDisplay.textContent = `Session ${status.session_id}`;
+            sessionIdDisplay.style.color = '#27ae60';
+            
+            if (status.start_time) {
+                this.sessionStartTime = new Date(status.start_time);
+                this.startElapsedTimer();
+            }
+            
+        } else {
+            // Telemetry is not running
+            startBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+            
+            sessionIdDisplay.textContent = 'No active session';
+            sessionIdDisplay.style.color = '#666';
+            
+            elapsedTimeDisplay.textContent = '';
+            this.stopElapsedTimer();
+        }
+    }
+    
+    startElapsedTimer() {
+        this.stopElapsedTimer(); // Clear any existing timer
+        
+        this.elapsedInterval = setInterval(() => {
+            if (this.sessionStartTime) {
+                const elapsed = Math.floor((Date.now() - this.sessionStartTime.getTime()) / 1000);
+                const hours = Math.floor(elapsed / 3600);
+                const minutes = Math.floor((elapsed % 3600) / 60);
+                const seconds = elapsed % 60;
+                
+                const timeStr = hours > 0 
+                    ? `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+                    : `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                document.getElementById('elapsed-time-display').textContent = timeStr;
+            }
+        }, 1000);
+    }
+    
+    stopElapsedTimer() {
+        if (this.elapsedInterval) {
+            clearInterval(this.elapsedInterval);
+            this.elapsedInterval = null;
         }
     }
     

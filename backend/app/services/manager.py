@@ -22,6 +22,7 @@ class ServiceManager:
         """Initialize the service manager."""
         self._active_sessions: Set[int] = set()
         self._service_tasks: Dict[int, Dict[str, asyncio.Task]] = {}
+        self._current_session_id: Optional[int] = None
         self._lock = asyncio.Lock()
     
     async def start_session_services(self, session_id: int, db: AsyncSession) -> bool:
@@ -109,6 +110,70 @@ class ServiceManager:
         """
         async with self._lock:
             return self._active_sessions.copy()
+    
+    def is_running(self) -> bool:
+        """Check if telemetry is currently running.
+        
+        Returns:
+            bool: True if telemetry is running, False otherwise.
+        """
+        return self._current_session_id is not None
+    
+    def get_current_session_id(self) -> Optional[int]:
+        """Get the current active session ID.
+        
+        Returns:
+            Optional[int]: Current session ID if running, None otherwise.
+        """
+        return self._current_session_id
+    
+    async def start_session(self, session_id: int, profile_id: Optional[int] = None) -> bool:
+        """Start a new telemetry session.
+        
+        Args:
+            session_id: ID of the session to start.
+            profile_id: Optional profile ID for device configuration.
+            
+        Returns:
+            bool: True if session started successfully, False otherwise.
+        """
+        async with self._lock:
+            if self._current_session_id is not None:
+                return False  # Already running
+            
+            try:
+                # Start services for the session
+                success = await self.start_session_services(session_id, None)  # TODO: Pass db
+                if success:
+                    self._current_session_id = session_id
+                    return True
+                return False
+                
+            except Exception as e:
+                print(f"Error starting session {session_id}: {e}")
+                return False
+    
+    async def stop_session(self) -> bool:
+        """Stop the current telemetry session.
+        
+        Returns:
+            bool: True if session stopped successfully, False otherwise.
+        """
+        async with self._lock:
+            if self._current_session_id is None:
+                return False  # Not running
+            
+            try:
+                session_id = self._current_session_id
+                success = await self.stop_session_services(session_id)
+                if success:
+                    self._current_session_id = None
+                    return True
+                return False
+                
+            except Exception as e:
+                print(f"Error stopping session: {e}")
+                return False
     
     async def _cleanup_session_services(self, session_id: int) -> None:
         """Clean up service tasks for a session.
