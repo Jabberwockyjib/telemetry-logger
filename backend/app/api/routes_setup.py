@@ -55,7 +55,7 @@ class DeviceProfileUpdate(BaseModel):
 
 class DeviceSetupCreate(BaseModel):
     """Device setup creation model."""
-    setup_type: str = Field(..., regex="^(gps|obd|meshtastic)$")
+    setup_type: str = Field(..., pattern="^(gps|obd|meshtastic)$")
     device_name: str = Field(..., min_length=1, max_length=255)
     profile_id: Optional[int] = None
     port_path: Optional[str] = None
@@ -64,7 +64,7 @@ class DeviceSetupCreate(BaseModel):
 
 class DeviceSetupUpdate(BaseModel):
     """Device setup update model."""
-    status: Optional[str] = Field(None, regex="^(pending|testing|success|failed)$")
+    status: Optional[str] = Field(None, pattern="^(pending|testing|success|failed)$")
     error_message: Optional[str] = None
     test_results: Optional[Dict[str, Any]] = None
 
@@ -72,7 +72,7 @@ class DeviceSetupUpdate(BaseModel):
 class DeviceTestRequest(BaseModel):
     """Device test request model."""
     setup_id: int
-    test_type: str = Field(..., regex="^(connection|data|full)$")
+    test_type: str = Field(..., pattern="^(connection|data|full)$")
 
 
 class DeviceTestResponse(BaseModel):
@@ -281,7 +281,7 @@ async def delete_device_profile(
 @router.get("/setups", response_model=List[Dict[str, Any]])
 async def get_device_setups(
     profile_id: Optional[int] = Query(None),
-    setup_type: Optional[str] = Query(None, regex="^(gps|obd|meshtastic)$"),
+    setup_type: Optional[str] = Query(None, pattern="^(gps|obd|meshtastic)$"),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
