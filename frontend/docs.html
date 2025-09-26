@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartelem User Documentation</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Documentation-specific styles */
+        .docs-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .docs-nav {
+            background: var(--card-bg-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .docs-nav h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .docs-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .docs-nav li {
+            margin: 10px 0;
+        }
+        
+        .docs-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+        
+        .docs-nav a:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .docs-content {
+            background: var(--card-bg-color);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .docs-section {
+            margin-bottom: 40px;
+        }
+        
+        .docs-section h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+        
+        .docs-section h3 {
+            color: var(--secondary-color);
+            margin-top: 30px;
+        }
+        
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .equipment-card {
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .equipment-card h4 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+        
+        .equipment-card .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .status.required {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .status.optional {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .status.recommended {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .setup-step {
+            background: var(--background-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .setup-step h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .troubleshooting-item {
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .troubleshooting-item h5 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .feature-card h4 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+        
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .docs-container {
+                padding: 10px;
+            }
+            
+            .docs-content {
+                padding: 20px;
+            }
+            
+            .equipment-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Cartelem User Documentation</h1>
+        <nav>
+            <a href="index.html">Live Dashboard</a>
+            <a href="replay.html">Data Replay</a>
+            <a href="docs.html" class="active">Documentation</a>
+        </nav>
+    </header>
+
+    <main class="docs-container">
+        <div class="docs-nav">
+            <h2>📚 Documentation Navigation</h2>
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#equipment">Required Equipment</a></li>
+                <li><a href="#setup">Setup Guide</a></li>
+                <li><a href="#configuration">Configuration</a></li>
+                <li><a href="#usage">Usage Guide</a></li>
+                <li><a href="#troubleshooting">Troubleshooting</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#support">Support</a></li>
+            </ul>
+        </div>
+
+        <div class="docs-content">
+            <section id="overview" class="docs-section">
+                <h2>🚀 Cartelem Overview</h2>
+                <p>Cartelem is a high-performance telemetry data collection and streaming system designed for automotive and IoT applications. It provides real-time data collection from OBD-II, GPS, and other sensors with WebSocket streaming, data export, and historical replay capabilities.</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h4>Real-time Data</h4>
+                        <p>Live telemetry streaming with &lt;200ms latency</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🗺️</div>
+                        <h4>GPS Tracking</h4>
+                        <p>Position, speed, and heading data</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🚗</div>
+                        <h4>OBD-II Support</h4>
+                        <p>Engine parameters and diagnostics</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📡</div>
+                        <h4>Radio Uplink</h4>
+                        <p>Meshtastic integration for remote telemetry</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💾</div>
+                        <h4>Data Export</h4>
+                        <p>CSV and Parquet export formats</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⏯️</div>
+                        <h4>Data Replay</h4>
+                        <p>Historical session playback</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="equipment" class="docs-section">
+                <h2>🔧 Required Equipment</h2>
+                <p>To use Cartelem effectively, you'll need the following equipment:</p>
+                
+                <div class="equipment-grid">
+                    <div class="equipment-card">
+                        <span class="status required">Required</span>
+                        <h4>Computer/Server</h4>
+                        <p><strong>Minimum Requirements:</strong></p>
+                        <ul>
+                            <li>Python 3.9+</li>
+                            <li>4GB RAM</li>
+                            <li>10GB storage</li>
+                            <li>USB ports</li>
+                        </ul>
+                        <p><strong>Recommended:</strong></p>
+                        <ul>
+                            <li>8GB+ RAM</li>
+                            <li>SSD storage</li>
+                            <li>Multiple USB ports</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="equipment-card">
+                        <span class="status required">Required</span>
+                        <h4>OBD-II Adapter</h4>
+                        <p><strong>Compatible Adapters:</strong></p>
+                        <ul>
+                            <li>ELM327-based adapters</li>
+                            <li>USB or Bluetooth connection</li>
+                            <li>Supports standard OBD-II PIDs</li>
+                        </ul>
+                        <p><strong>Recommended:</strong></p>
+                        <ul>
+                            <li>USB connection for reliability</li>
+                            <li>Fast response time</li>
+                            <li>Good signal strength</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="equipment-card">
+                        <span class="status recommended">Recommended</span>
+                        <h4>GPS Device</h4>
+                        <p><strong>Requirements:</strong></p>
+                        <ul>
+                            <li>NMEA 0183 output</li>
+                            <li>Serial connection (USB/RS232)</li>
+                            <li>GGA, RMC, VTG sentences</li>
+                        </ul>
+                        <p><strong>Recommended:</strong></p>
+                        <ul>
+                            <li>10Hz update rate</li>
+                            <li>WAAS/EGNOS support</li>
+                            <li>External antenna</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="equipment-card">
+                        <span class="status optional">Optional</span>
+                        <h4>Meshtastic Device</h4>
+                        <p><strong>For Radio Uplink:</strong></p>
+                        <ul>
+                            <li>Meshtastic-compatible device</li>
+                            <li>Serial connection</li>
+                            <li>LoRa radio module</li>
+                        </ul>
+                        <p><strong>Benefits:</strong></p>
+                        <ul>
+                            <li>Remote telemetry transmission</li>
+                            <li>Off-grid communication</li>
+                            <li>Mesh networking</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="equipment-card">
+                        <span class="status optional">Optional</span>
+                        <h4>Network Equipment</h4>
+                        <p><strong>For Remote Access:</strong></p>
+                        <ul>
+                            <li>WiFi router</li>
+                            <li>Ethernet connection</li>
+                            <li>Port forwarding capability</li>
+                        </ul>
+                        <p><strong>For Production:</strong></p>
+                        <ul>
+                            <li>Static IP address</li>
+                            <li>Domain name</li>
+                            <li>SSL certificate</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="equipment-card">
+                        <span class="status optional">Optional</span>
+                        <h4>Additional Sensors</h4>
+                        <p><strong>Custom Sensors:</strong></p>
+                        <ul>
+                            <li>Temperature sensors</li>
+                            <li>Pressure sensors</li>
+                            <li>Accelerometers</li>
+                            <li>Custom serial devices</li>
+                        </ul>
+                        <p><strong>Integration:</strong></p>
+                        <ul>
+                            <li>Serial communication</li>
+                            <li>Custom data formats</li>
+                            <li>Real-time processing</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="setup" class="docs-section">
+                <h2>⚙️ Setup Guide</h2>
+                
+                <h3>1. Software Installation</h3>
+                <div class="setup-step">
+                    <h4>Install Python Dependencies</h4>
+                    <div class="code-block">
+pip install -r requirements.txt
+                    </div>
+                    <p>This installs all required Python packages including FastAPI, SQLAlchemy, and hardware communication libraries.</p>
+                </div>
+                
+                <div class="setup-step">
+                    <h4>Initialize Database</h4>
+                    <div class="code-block">
+alembic upgrade head
+                    </div>
+                    <p>Creates the database schema and initializes the telemetry tables.</p>
+                </div>
+                
+                <div class="setup-step">
+                    <h4>Start the Application</h4>
+                    <div class="code-block">
+python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+                    </div>
+                    <p>Starts the Cartelem server with auto-reload for development.</p>
+                </div>
+                
+                <h3>2. Hardware Connection</h3>
+                <div class="setup-step">
+                    <h4>Connect OBD-II Adapter</h4>
+                    <ol>
+                        <li>Plug the OBD-II adapter into your vehicle's OBD port (usually under the dashboard)</li>
+                        <li>Connect the adapter to your computer via USB</li>
+                        <li>Note the serial port path (e.g., <code>/dev/ttyUSB0</code> on Linux, <code>COM3</code> on Windows)</li>
+                    </ol>
+                </div>
+                
+                <div class="setup-step">
+                    <h4>Connect GPS Device</h4>
+                    <ol>
+                        <li>Connect your GPS device to a USB port</li>
+                        <li>Ensure the device is configured for NMEA output</li>
+                        <li>Note the serial port path and baud rate (typically 4800 or 9600)</li>
+                    </ol>
+                </div>
+                
+                <div class="setup-step">
+                    <h4>Connect Meshtastic Device (Optional)</h4>
+                    <ol>
+                        <li>Connect your Meshtastic device via USB</li>
+                        <li>Configure the device for telemetry mode</li>
+                        <li>Set up the radio parameters (frequency, power, etc.)</li>
+                    </ol>
+                </div>
+                
+                <h3>3. Configuration</h3>
+                <div class="setup-step">
+                    <h4>Create Environment File</h4>
+                    <div class="code-block">
+# Database
+DATABASE_URL=sqlite+aiosqlite:///./cartelem.db
+
+# GPS Configuration
+GPS_PORT=/dev/ttyUSB0
+GPS_BAUDRATE=4800
+GPS_RATE_HZ=10
+
+# OBD Configuration
+OBD_PORT=/dev/ttyUSB1
+OBD_BAUDRATE=38400
+OBD_RATE_HZ=5
+
+# Meshtastic Configuration
+MESHTASTIC_DEVICE_PATH=/dev/ttyUSB2
+MESHTASTIC_RATE_HZ=1
+
+# Application Settings
+DEBUG=true
+LOG_LEVEL=INFO
+                    </div>
+                    <p>Save this as <code>.env</code> in your project directory and adjust the port paths to match your hardware.</p>
+                </div>
+                
+                <div class="warning">
+                    <strong>⚠️ Important:</strong> Make sure to update the port paths in your configuration to match the actual devices connected to your system. Use <code>ls /dev/tty*</code> on Linux or Device Manager on Windows to find the correct ports.
+                </div>
+            </section>
+
+            <section id="configuration" class="docs-section">
+                <h2>🔧 Configuration Options</h2>
+                
+                <h3>Environment Variables</h3>
+                <div class="setup-step">
+                    <h4>Database Configuration</h4>
+                    <div class="code-block">
+# SQLite (Development)
+DATABASE_URL=sqlite+aiosqlite:///./cartelem.db
+
+# PostgreSQL (Production)
+DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/cartelem
+                    </div>
+                </div>
+                
+                <div class="setup-step">
+                    <h4>GPS Service Configuration</h4>
+                    <div class="code-block">
+GPS_PORT=/dev/ttyUSB0          # Serial port path
+GPS_BAUDRATE=4800              # Baud rate (4800, 9600, 38400)
+GPS_RATE_HZ=10                 # Data collection rate
+GPS_TIMEOUT=1.0                # Serial timeout in seconds
+GPS_MAX_RECONNECT=10           # Max reconnection attempts
+GPS_RECONNECT_DELAY=5.0        # Delay between reconnects
+                    </div>
+                </div>
+                
+                <div class="setup-step">
+                    <h4>OBD Service Configuration</h4>
+                    <div class="code-block">
+OBD_PORT=/dev/ttyUSB1          # Serial port path
+OBD_BAUDRATE=38400             # Baud rate (typically 38400)
+OBD_TIMEOUT=5.0                # Command timeout
+OBD_MAX_RECONNECT=5            # Max reconnection attempts
+OBD_RECONNECT_DELAY=10.0       # Delay between reconnects
+                    </div>
+                </div>
+                
+                <div class="setup-step">
+                    <h4>Meshtastic Service Configuration</h4>
+                    <div class="code-block">
+MESHTASTIC_DEVICE_PATH=/dev/ttyUSB2  # Device path
+MESHTASTIC_BAUDRATE=38400            # Baud rate
+MESHTASTIC_RATE_HZ=1                 # Transmission rate
+MESHTASTIC_MAX_PAYLOAD=64            # Max payload size
+                    </div>
+                </div>
+                
+                <div class="setup-step">
+                    <h4>Application Configuration</h4>
+                    <div class="code-block">
+DEBUG=true                     # Enable debug mode
+HOST=0.0.0.0                  # Server host
+PORT=8000                     # Server port
+LOG_LEVEL=INFO                # Logging level
+                    </div>
+                </div>
+                
+                <h3>OBD PID Configuration</h3>
+                <div class="info">
+                    <strong>💡 Tip:</strong> You can customize which OBD parameters to collect by modifying the PID configuration in the OBD service. Default PIDs include speed, RPM, throttle position, coolant temperature, and engine load.
+                </div>
+                
+                <div class="code-block">
+# Default OBD PIDs
+DEFAULT_PIDS = {
+    "SPEED": {"rate_hz": 10.0, "unit": "kph", "description": "Vehicle speed"},
+    "RPM": {"rate_hz": 10.0, "unit": "rpm", "description": "Engine RPM"},
+    "THROTTLE_POS": {"rate_hz": 5.0, "unit": "%", "description": "Throttle position"},
+    "COOLANT_TEMP": {"rate_hz": 2.0, "unit": "C", "description": "Coolant temperature"},
+    "ENGINE_LOAD": {"rate_hz": 5.0, "unit": "%", "description": "Engine load"},
+}
+                </div>
+            </section>
+
+            <section id="usage" class="docs-section">
+                <h2>📖 Usage Guide</h2>
+                
+                <h3>1. Accessing the Dashboard</h3>
+                <div class="setup-step">
+                    <h4>Open the Web Interface</h4>
+                    <p>Navigate to <code>http://localhost:8000</code> in your web browser to access the Cartelem dashboard.</p>
+                    <p>You'll see two main interfaces:</p>
+                    <ul>
+                        <li><strong>Live Dashboard</strong> - Real-time telemetry visualization</li>
+                        <li><strong>Data Replay</strong> - Historical session playback</li>
+                    </ul>
+                </div>
+                
+                <h3>2. Creating a Session</h3>
+                <div class="setup-step">
+                    <h4>Start a New Telemetry Session</h4>
+                    <ol>
+                        <li>Click "Create New Session" on the dashboard</li>
+                        <li>Enter session details:
+                            <ul>
+                                <li>Session name (e.g., "Track Day 1")</li>
+                                <li>Car ID (e.g., "CAR001")</li>
+                                <li>Driver name</li>
+                                <li>Track/location</li>
+                            </ul>
+                        </li>
+                        <li>Click "Create Session"</li>
+                    </ol>
+                </div>
+                
+                <h3>3. Starting Data Collection</h3>
+                <div class="setup-step">
+                    <h4>Begin Telemetry Collection</h4>
+                    <ol>
+                        <li>Select your session from the dropdown</li>
+                        <li>Click "Start Session" to begin data collection</li>
+                        <li>Verify that data is flowing:
+                            <ul>
+                                <li>GPS coordinates updating on the map</li>
+                                <li>Charts showing real-time data</li>
+                                <li>Status indicators showing "Connected"</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+                
+                <h3>4. Monitoring Real-time Data</h3>
+                <div class="setup-step">
+                    <h4>Live Dashboard Features</h4>
+                    <ul>
+                        <li><strong>GPS Map</strong> - Real-time position tracking</li>
+                        <li><strong>Speed/RPM Chart</strong> - Engine performance data</li>
+                        <li><strong>Engine Parameters</strong> - Temperature, load, throttle</li>
+                        <li><strong>Status Cards</strong> - Connection status for each service</li>
+                    </ul>
+                </div>
+                
+                <h3>5. Stopping and Exporting Data</h3>
+                <div class="setup-step">
+                    <h4>End Session and Export Data</h4>
+                    <ol>
+                        <li>Click "Stop Session" when data collection is complete</li>
+                        <li>Navigate to the "Data Replay" page</li>
+                        <li>Select your session from the dropdown</li>
+                        <li>Use the time scrubber to review the session</li>
+                        <li>Click "Export CSV" or "Export Parquet" to download data</li>
+                    </ol>
+                </div>
+                
+                <h3>6. Data Replay and Analysis</h3>
+                <div class="setup-step">
+                    <h4>Historical Data Analysis</h4>
+                    <ul>
+                        <li><strong>Time Navigation</strong> - Use the scrubber to jump to specific times</li>
+                        <li><strong>Playback Controls</strong> - Play/pause for smooth data review</li>
+                        <li><strong>Chart Analysis</strong> - Review performance trends</li>
+                        <li><strong>GPS Track</strong> - Visualize the complete route</li>
+                        <li><strong>Export Options</strong> - Download data for external analysis</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="troubleshooting" class="docs-section">
+                <h2>🔧 Troubleshooting</h2>
+                
+                <h3>Common Issues and Solutions</h3>
+                
+                <div class="troubleshooting-item">
+                    <h5>OBD-II Adapter Not Detected</h5>
+                    <p><strong>Symptoms:</strong> OBD service shows "Not Connected" status</p>
+                    <p><strong>Solutions:</strong></p>
+                    <ul>
+                        <li>Check USB connection and try a different port</li>
+                        <li>Verify the adapter is compatible with your vehicle</li>
+                        <li>Update the port path in configuration (e.g., <code>/dev/ttyUSB0</code>)</li>
+                        <li>Check if the adapter requires drivers</li>
+                        <li>Test with a different OBD-II adapter</li>
+                    </ul>
+                </div>
+                
+                <div class="troubleshooting-item">
+                    <h5>GPS Device Not Responding</h5>
+                    <p><strong>Symptoms:</strong> GPS service shows "Not Connected" or no position data</p>
+                    <p><strong>Solutions:</strong></p>
+                    <ul>
+                        <li>Ensure GPS device has clear sky view</li>
+                        <li>Check baud rate configuration (typically 4800 or 9600)</li>
+                        <li>Verify NMEA output is enabled on the device</li>
+                        <li>Test with a different GPS device</li>
+                        <li>Check serial port permissions</li>
+                    </ul>
+                </div>
+                
+                <div class="troubleshooting-item">
+                    <h5>WebSocket Connection Issues</h5>
+                    <p><strong>Symptoms:</strong> Dashboard shows "Disconnected" status</p>
+                    <p><strong>Solutions:</strong></p>
+                    <ul>
+                        <li>Refresh the web page</li>
+                        <li>Check if the server is running</li>
+                        <li>Verify firewall settings</li>
+                        <li>Try accessing from a different browser</li>
+                        <li>Check server logs for errors</li>
+                    </ul>
+                </div>
+                
+                <div class="troubleshooting-item">
+                    <h5>Database Connection Errors</h5>
+                    <p><strong>Symptoms:</strong> Application fails to start or data not saving</p>
+                    <p><strong>Solutions:</strong></p>
+                    <ul>
+                        <li>Check database file permissions</li>
+                        <li>Verify database URL configuration</li>
+                        <li>Run database migrations: <code>alembic upgrade head</code></li>
+                        <li>Check disk space availability</li>
+                        <li>Restart the application</li>
+                    </ul>
+                </div>
+                
+                <div class="troubleshooting-item">
+                    <h5>Performance Issues</h5>
+                    <p><strong>Symptoms:</strong> Slow response times or data lag</p>
+                    <p><strong>Solutions:</strong></p>
+                    <ul>
+                        <li>Reduce data collection rates</li>
+                        <li>Check system resources (CPU, memory)</li>
+                        <li>Optimize database configuration</li>
+                        <li>Use SSD storage for better performance</li>
+                        <li>Close unnecessary applications</li>
+                    </ul>
+                </div>
+                
+                <h3>Diagnostic Commands</h3>
+                <div class="setup-step">
+                    <h4>Check Serial Ports</h4>
+                    <div class="code-block">
+# Linux/macOS
+ls /dev/tty*
+
+# Windows
+# Use Device Manager to check COM ports
+                    </div>
+                </div>
+                
+                <div class="setup-step">
+                    <h4>Test Serial Communication</h4>
+                    <div class="code-block">
+# Test GPS device
+python -c "import serial; s=serial.Serial('/dev/ttyUSB0', 4800); print(s.readline())"
+
+# Test OBD device
+python -c "import serial; s=serial.Serial('/dev/ttyUSB1', 38400); s.write(b'ATZ\r'); print(s.readline())"
+                    </div>
+                </div>
+                
+                <div class="setup-step">
+                    <h4>Check Application Logs</h4>
+                    <div class="code-block">
+# View application logs
+tail -f logs/cartelem.log
+
+# Check system resources
+top
+htop
+                    </div>
+                </div>
+            </section>
+
+            <section id="features" class="docs-section">
+                <h2>✨ Features</h2>
+                
+                <h3>Real-time Data Collection</h3>
+                <ul>
+                    <li><strong>GPS Tracking</strong> - Position, speed, heading, altitude</li>
+                    <li><strong>OBD-II Diagnostics</strong> - Engine parameters, fuel data, emissions</li>
+                    <li><strong>Custom Sensors</strong> - Extensible architecture for additional data sources</li>
+                    <li><strong>High Frequency</strong> - Up to 10Hz data collection rates</li>
+                </ul>
+                
+                <h3>Data Visualization</h3>
+                <ul>
+                    <li><strong>Live Charts</strong> - Real-time performance graphs</li>
+                    <li><strong>Interactive Maps</strong> - GPS track visualization</li>
+                    <li><strong>Status Monitoring</strong> - Connection and data quality indicators</li>
+                    <li><strong>Responsive Design</strong> - Works on desktop and mobile devices</li>
+                </ul>
+                
+                <h3>Data Management</h3>
+                <ul>
+                    <li><strong>Session Management</strong> - Create, start, stop, and organize sessions</li>
+                    <li><strong>Historical Replay</strong> - Time-based data navigation</li>
+                    <li><strong>Data Export</strong> - CSV and Parquet formats</li>
+                    <li><strong>Filtering</strong> - Time range, source, and channel filters</li>
+                </ul>
+                
+                <h3>Communication</h3>
+                <ul>
+                    <li><strong>WebSocket Streaming</strong> - Real-time data transmission</li>
+                    <li><strong>REST API</strong> - Programmatic access to data</li>
+                    <li><strong>Radio Uplink</strong> - Meshtastic integration for remote telemetry</li>
+                    <li><strong>Binary Packing</strong> - Efficient data compression</li>
+                </ul>
+                
+                <h3>Performance</h3>
+                <ul>
+                    <li><strong>High Throughput</strong> - ≥5k rows/min database writes</li>
+                    <li><strong>Low Latency</strong> - &lt;200ms WebSocket data streaming</li>
+                    <li><strong>Scalable Architecture</strong> - Async processing and batching</li>
+                    <li><strong>Resource Efficient</strong> - Optimized for embedded systems</li>
+                </ul>
+            </section>
+
+            <section id="support" class="docs-section">
+                <h2>🆘 Support</h2>
+                
+                <h3>Getting Help</h3>
+                <div class="setup-step">
+                    <h4>Documentation</h4>
+                    <ul>
+                        <li><strong>API Documentation</strong> - <a href="/docs" target="_blank">Interactive API docs</a></li>
+                        <li><strong>Deployment Guide</strong> - Production setup instructions</li>
+                        <li><strong>Contributing Guide</strong> - Development and contribution guidelines</li>
+                    </ul>
+                </div>
+                
+                <div class="setup-step">
+                    <h4>Community Support</h4>
+                    <ul>
+                        <li><strong>GitHub Issues</strong> - Bug reports and feature requests</li>
+                        <li><strong>GitHub Discussions</strong> - Community questions and answers</li>
+                        <li><strong>Wiki</strong> - Community-maintained documentation</li>
+                    </ul>
+                </div>
+                
+                <div class="setup-step">
+                    <h4>Professional Support</h4>
+                    <ul>
+                        <li><strong>Custom Development</strong> - Tailored solutions for specific needs</li>
+                        <li><strong>Integration Services</strong> - Help with hardware integration</li>
+                        <li><strong>Training</strong> - On-site or remote training sessions</li>
+                    </ul>
+                </div>
+                
+                <h3>System Requirements</h3>
+                <div class="info">
+                    <strong>Minimum Requirements:</strong>
+                    <ul>
+                        <li>Python 3.9+</li>
+                        <li>4GB RAM</li>
+                        <li>10GB storage</li>
+                        <li>USB ports for hardware</li>
+                    </ul>
+                    
+                    <strong>Recommended:</strong>
+                    <ul>
+                        <li>Python 3.11+</li>
+                        <li>8GB+ RAM</li>
+                        <li>SSD storage</li>
+                        <li>Multiple USB ports</li>
+                        <li>Stable internet connection</li>
+                    </ul>
+                </div>
+                
+                <h3>License</h3>
+                <p>Cartelem is released under the MIT License, allowing for both commercial and non-commercial use. See the <a href="/LICENSE" target="_blank">LICENSE</a> file for details.</p>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('.docs-nav a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Highlight current section in navigation
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('.docs-section');
+            const navLinks = document.querySelectorAll('.docs-nav a[href^="#"]');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
