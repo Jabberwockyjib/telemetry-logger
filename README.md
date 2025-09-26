@@ -133,14 +133,40 @@ MESHTASTIC_RATE_HZ=1
 
 ## 🎯 Usage
 
-### Creating a Session
+### Creating New Sessions
 ```bash
-# Create a new telemetry session
+# Create a new session with details
+curl -X POST http://localhost:8000/api/v1/sessions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Track Day 1",
+    "car_id": "CAR001",
+    "driver": "John Doe",
+    "track": "Laguna Seca",
+    "notes": "First track day of the season"
+  }'
+```
+
+### Starting and Stopping Telemetry
+```bash
+# Start telemetry logging (creates session automatically)
+curl -X POST http://localhost:8000/api/v1/telemetry/start
+
+# Check telemetry status
+curl http://localhost:8000/api/v1/telemetry/status
+
+# Stop telemetry logging
+curl -X POST http://localhost:8000/api/v1/telemetry/stop
+```
+
+### Manual Session Management
+```bash
+# Create a new telemetry session manually
 curl -X POST http://localhost:8000/api/v1/sessions \
   -H 'Content-Type: application/json' \
   -d '{"name": "Track Day", "car_id": "CAR001", "driver": "John Doe"}'
 
-# Start data collection
+# Start data collection for specific session
 curl -X POST http://localhost:8000/api/v1/sessions/1/start
 
 # Stop data collection
@@ -173,6 +199,11 @@ ws.onmessage = (event) => {
 ## 📚 API Documentation
 
 ### Core Endpoints
+
+#### Telemetry Control
+- `POST /api/v1/telemetry/start` - Start telemetry logging
+- `POST /api/v1/telemetry/stop` - Stop telemetry logging
+- `GET /api/v1/telemetry/status` - Get current telemetry status
 
 #### Sessions
 - `POST /api/v1/sessions` - Create new session
@@ -209,6 +240,8 @@ ws.onmessage = (event) => {
 - Live GPS map (Leaflet)
 - Status cards for all data sources
 - WebSocket connection management
+- **Start/Stop Telemetry Controls**: One-click telemetry session management
+- **Session Status Display**: Current session ID and elapsed time
 
 ### Data Replay (`/replay.html`)
 - Historical session playback

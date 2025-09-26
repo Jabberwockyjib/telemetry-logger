@@ -17,4 +17,4 @@ httpx>=0.25.0
 ruff>=0.1.0
 black>=23.0.0
 mypy>=1.6.0
-types-aiosqlite>=0.19.0
+# types-aiosqlite not available on PyPI
