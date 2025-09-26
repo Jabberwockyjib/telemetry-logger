@@ -133,6 +133,20 @@ MESHTASTIC_RATE_HZ=1
 
 ## 🎯 Usage
 
+### Creating New Sessions
+```bash
+# Create a new session with details
+curl -X POST http://localhost:8000/api/v1/sessions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Track Day 1",
+    "car_id": "CAR001",
+    "driver": "John Doe",
+    "track": "Laguna Seca",
+    "notes": "First track day of the season"
+  }'
+```
+
 ### Starting and Stopping Telemetry
 ```bash
 # Start telemetry logging (creates session automatically)

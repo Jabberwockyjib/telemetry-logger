@@ -29,6 +29,7 @@ class Session(Base):
     car_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     driver: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     track: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_utc: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)

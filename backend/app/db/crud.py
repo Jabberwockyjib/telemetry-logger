@@ -20,6 +20,7 @@ class SessionCRUD:
         car_id: Optional[str] = None,
         driver: Optional[str] = None,
         track: Optional[str] = None,
+        notes: Optional[str] = None,
     ) -> Session:
         """Create a new session.
 
@@ -29,6 +30,7 @@ class SessionCRUD:
             car_id: Optional car ID.
             driver: Optional driver name.
             track: Optional track name.
+            notes: Optional session notes.
 
         Returns:
             Created session.
@@ -38,6 +40,7 @@ class SessionCRUD:
             car_id=car_id,
             driver=driver,
             track=track,
+            notes=notes,
         )
         db.add(session)
         await db.commit()

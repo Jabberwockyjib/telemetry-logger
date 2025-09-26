@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Session Creation UI**: Added "Create New Session" button and modal form on dashboard
+- **Session Form Fields**: Name (required), Car ID, Driver Name, Track/Location, Notes
+- **Form Validation**: Client-side validation for required fields and length limits
+- **Success Notifications**: Toast notifications for successful session creation
+- **Session Info Display**: Updated dashboard to show created session details
+- **Database Schema**: Added `notes` field to sessions table
+- **API Integration**: Frontend form submits to `/api/v1/sessions` endpoint
+- **Loading States**: Form submission with loading spinner and disabled states
+- **Error Handling**: Form error display and API error handling
+- **Modal UI**: Responsive modal with proper styling and accessibility
+- **Comprehensive Tests**: 7 backend integration tests and 20 frontend tests for session creation
 - Telemetry start/stop controls for simplified session management
 - One-click telemetry logging with automatic session creation
 - Real-time session status display with elapsed time
