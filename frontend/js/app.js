@@ -96,21 +96,26 @@ class TelemetryApp {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
-            const sessions = await response.json();
+            const data = await response.json();
+            const sessions = data.sessions || data; // Handle both response formats
             const select = document.getElementById('session-select');
             
             // Clear existing options
             select.innerHTML = '<option value="">Select a session...</option>';
             
             // Add session options
-            sessions.forEach(session => {
-                const option = document.createElement('option');
-                option.value = session.id;
-                option.textContent = `${session.name} (${session.car_id || 'Unknown'})`;
-                select.appendChild(option);
-            });
-            
-            console.log(`Loaded ${sessions.length} sessions`);
+            if (Array.isArray(sessions)) {
+                sessions.forEach(session => {
+                    const option = document.createElement('option');
+                    option.value = session.id;
+                    option.textContent = `${session.name} (${session.car_id || 'Unknown'})`;
+                    select.appendChild(option);
+                });
+                
+                console.log(`Loaded ${sessions.length} sessions`);
+            } else {
+                console.warn('Sessions data is not an array:', sessions);
+            }
         } catch (error) {
             console.error('Failed to load sessions:', error);
             this.showError('Failed to load sessions. Please refresh the page.');
