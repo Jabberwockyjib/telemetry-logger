@@ -38,6 +38,37 @@ class TestButtonVisibility:
         assert 'class="btn btn-secondary"' in content # Previous
         assert 'class="btn btn-success"' in content   # Complete Setup
 
+    def test_setup_page_button_styles_have_high_contrast(self, client):
+        """Test that setup page buttons have high contrast colors."""
+        response = client.get("/setup.html")
+        assert response.status_code == 200
+        content = response.text
+        
+        # Check that setup page has high-contrast button colors
+        assert 'background: #2c5aa0;' in content  # Primary button - dark blue
+        assert 'background: #6c757d;' in content  # Secondary button - dark gray
+        assert 'background: #28a745;' in content  # Success button - dark green
+        assert 'color: white;' in content         # White text for contrast
+        
+        # Check hover states have even darker colors
+        assert 'background: #1e3f73;' in content  # Primary hover - darker blue
+        assert 'background: #545b62;' in content  # Secondary hover - darker gray
+        assert 'background: #1e7e34;' in content  # Success hover - darker green
+
+    def test_setup_page_buttons_have_enhanced_styling(self, client):
+        """Test that setup page buttons have enhanced styling for visibility."""
+        response = client.get("/setup.html")
+        assert response.status_code == 200
+        content = response.text
+        
+        # Check enhanced button styling
+        assert 'padding: 14px 28px;' in content    # Larger padding
+        assert 'border: 2px solid transparent;' in content  # Border for definition
+        assert 'box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);' in content  # Shadow for depth
+        assert 'min-width: 140px;' in content      # Minimum width
+        assert 'font-size: 15px;' in content       # Larger font size
+        assert 'font-weight: 600;' in content      # Bold font weight
+
     def test_css_variables_defined(self, client):
         """Test that CSS variables are defined in the stylesheet."""
         response = client.get("/css/styles.css")
