@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dynamic port dropdown updates in setup wizard
 - Toast notification system for user feedback
 - Comprehensive device scanning tests
+
+### Fixed
+- Button visibility and contrast issues across all frontend pages
+- CSS variable definitions for consistent theming
+- WCAG accessibility compliance for button colors and focus states
+- Missing button styles in setup wizard and documentation pages
 - GPS service (`backend/app/services/gps_service.py`) with NMEA parsing capabilities:
   - Reads NMEA data from configurable serial ports with automatic reconnection and backoff logic
   - Parses GGA (Global Positioning System Fix Data), RMC (Recommended Minimum Navigation Information), and VTG (Track Made Good and Ground Speed) sentences
