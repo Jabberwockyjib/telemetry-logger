@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Device Profile Persistence**: Device profiles now persist across server restarts
+- **Service Configuration Loading**: Services automatically load configuration from device profiles on startup
+- **Comprehensive Port Logging**: Added detailed logging for port paths, baud rates, and service configurations
+- **Profile-Based Service Creation**: GPS, OBD, and Meshtastic services are created with profile-specific configurations
+- **JSON Configuration Parsing**: Service manager properly parses JSON-stored device configurations
+- **Profile Loading on Startup**: Service manager automatically loads default device profile during application startup
+- **Configuration Validation**: Added validation for device profile configurations and service parameters
+- **Comprehensive Tests**: Added 9 test cases for device profile persistence and service configuration
 - **Session Creation UI**: Added "Create New Session" button and modal form on dashboard
 - **Session Form Fields**: Name (required), Car ID, Driver Name, Track/Location, Notes
 - **Form Validation**: Client-side validation for required fields and length limits

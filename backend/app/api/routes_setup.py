@@ -194,6 +194,22 @@ async def create_device_profile(
             custom_config=profile_data.custom_config,
             is_default=profile_data.is_default,
         )
+        
+        # Log configuration details
+        logger.info(f"Created device profile: {profile.name} (ID: {profile.id})")
+        if gps_config:
+            logger.info(f"GPS Configuration - Port: {gps_config.get('port', 'default')}, "
+                       f"Baud Rate: {gps_config.get('baud_rate', 'default')}, "
+                       f"Rate: {gps_config.get('rate_hz', 'default')} Hz")
+        if obd_config:
+            logger.info(f"OBD Configuration - Port: {obd_config.get('port', 'default')}, "
+                       f"Baud Rate: {obd_config.get('baud_rate', 'default')}, "
+                       f"Rate: {obd_config.get('rate_hz', 'default')} Hz")
+        if meshtastic_config:
+            logger.info(f"Meshtastic Configuration - Port: {meshtastic_config.get('port', 'default')}, "
+                       f"Baud Rate: {meshtastic_config.get('baud_rate', 'default')}, "
+                       f"Rate: {meshtastic_config.get('rate_hz', 'default')} Hz")
+        
         return profile.to_dict()
     except Exception as e:
         logger.error(f"Error creating device profile: {e}")
@@ -240,6 +256,25 @@ async def update_device_profile(
         profile = await device_profile_crud.update(db, profile_id, **update_data)
         if not profile:
             raise HTTPException(status_code=404, detail=f"Profile {profile_id} not found")
+        
+        # Log configuration changes
+        logger.info(f"Updated device profile: {profile.name} (ID: {profile.id})")
+        if 'gps_config' in update_data and update_data['gps_config']:
+            gps_config = update_data['gps_config']
+            logger.info(f"GPS Configuration Updated - Port: {gps_config.get('port', 'default')}, "
+                       f"Baud Rate: {gps_config.get('baud_rate', 'default')}, "
+                       f"Rate: {gps_config.get('rate_hz', 'default')} Hz")
+        if 'obd_config' in update_data and update_data['obd_config']:
+            obd_config = update_data['obd_config']
+            logger.info(f"OBD Configuration Updated - Port: {obd_config.get('port', 'default')}, "
+                       f"Baud Rate: {obd_config.get('baud_rate', 'default')}, "
+                       f"Rate: {obd_config.get('rate_hz', 'default')} Hz")
+        if 'meshtastic_config' in update_data and update_data['meshtastic_config']:
+            mesh_config = update_data['meshtastic_config']
+            logger.info(f"Meshtastic Configuration Updated - Port: {mesh_config.get('port', 'default')}, "
+                       f"Baud Rate: {mesh_config.get('baud_rate', 'default')}, "
+                       f"Rate: {mesh_config.get('rate_hz', 'default')} Hz")
+        
         return profile.to_dict()
     except HTTPException:
         raise

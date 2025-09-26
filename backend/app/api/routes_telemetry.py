@@ -115,7 +115,7 @@ async def start_telemetry(
         )
         
         # Start services with the session
-        await manager.start_session(session.id, profile_id)
+        await manager.start_session(session.id, profile_id, db)
         
         logger.info(f"Telemetry started - Session ID: {session.id}, Profile ID: {profile_id}")
         
