@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Telemetry start/stop controls for simplified session management
+- One-click telemetry logging with automatic session creation
+- Real-time session status display with elapsed time
+- Backend API endpoints for telemetry control (`/api/v1/telemetry/start`, `/api/v1/telemetry/stop`, `/api/v1/telemetry/status`)
+- Frontend dashboard integration with start/stop buttons
+- Session management improvements with `is_active` column
+- Comprehensive tests for telemetry controls (backend and frontend)
 - Device scanning functionality with fresh port detection
 - Real-time device scanning API endpoint (`/api/v1/devices/scan`)
 - Dynamic port dropdown updates in setup wizard

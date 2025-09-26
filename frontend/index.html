@@ -24,6 +24,20 @@
                 <span id="connection-status" class="status-disconnected">Disconnected</span>
                 <span id="session-info" class="session-info"></span>
             </div>
+            <div class="telemetry-controls">
+                <button id="start-telemetry-btn" class="btn btn-success">
+                    <span class="loading" style="display: none;"></span>
+                    Start Telemetry
+                </button>
+                <button id="stop-telemetry-btn" class="btn btn-danger" style="display: none;">
+                    <span class="loading" style="display: none;"></span>
+                    Stop Telemetry
+                </button>
+                <div id="telemetry-status" class="telemetry-status">
+                    <span id="session-id-display">No active session</span>
+                    <span id="elapsed-time-display"></span>
+                </div>
+            </div>
         </header>
 
         <!-- Summary Cards -->

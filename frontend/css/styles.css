@@ -43,6 +43,35 @@ body {
     gap: 15px;
 }
 
+.telemetry-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: 20px;
+}
+
+.telemetry-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: 12px;
+    color: #666;
+}
+
+.telemetry-status span {
+    margin: 2px 0;
+}
+
+#session-id-display {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+#elapsed-time-display {
+    font-family: 'Courier New', monospace;
+    color: #27ae60;
+}
+
 .status-disconnected {
     color: #e74c3c;
     font-weight: 500;
@@ -248,6 +277,26 @@ body {
 
 .btn-secondary:hover:not(:disabled) {
     background: #7f8c8d;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background: #229954;
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #c0392b;
     transform: translateY(-1px);
 }
 

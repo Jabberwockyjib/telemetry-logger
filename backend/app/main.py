@@ -13,6 +13,7 @@ from .api.routes_ws import router as ws_router
 from .api.routes_export import router as export_router
 from .api.routes_setup import router as setup_router
 from .api.routes_devices import router as devices_router
+from .api.routes_telemetry import router as telemetry_router
 from .config import settings
 
 
@@ -68,6 +69,7 @@ def create_app() -> FastAPI:
     app.include_router(export_router, prefix="/api/v1", tags=["export"])
     app.include_router(setup_router, prefix="/api/v1", tags=["setup"])
     app.include_router(devices_router, prefix="/api/v1", tags=["devices"])
+    app.include_router(telemetry_router, prefix="/api/v1", tags=["telemetry"])
     
     # Mount static files for frontend
     app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
