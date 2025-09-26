@@ -28,12 +28,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         None: Application is running.
     """
     # Startup
-    from .db.base import get_async_db
+    from .db.base import get_db
     from .services.manager import service_manager
     from .services.websocket_bus import websocket_bus
     
     # Initialize service manager with device profiles
-    async for db in get_async_db():
+    async for db in get_db():
         await service_manager.initialize(db)
         break  # Only need one database session for initialization
     
