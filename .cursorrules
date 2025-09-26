@@ -1,32 +1,71 @@
-# Telemetry workspace rules (keep Cursor on target)
+# Cursor Rules — Telemetry Project (merged)
 
-## Goals
-- Async FastAPI backend with SQLAlchemy 2.0 (async engine).
+GOALS
+- Async FastAPI backend with SQLAlchemy 2.x (async engine) and Alembic.
 - Timeseries schema: `sessions`, `signals` (append-only), optional `frames`.
-- WebSocket for live frames; REST for history & exports.
-- Meshtastic uplink @ ~1 Hz using compact packed payloads.
-- Plain HTML/JS (Chart.js, Leaflet later) — no heavy framework.
+- WebSocket for live frames; REST for history, exports, and replay.
+- Meshtastic uplink at ~1 Hz using compact packed payloads.
+- Plain HTML/JS (Chart.js + Leaflet) — no heavy framework.
 
-## Constraints
-- Python >=3.10. Typed, small modules (< 300 LoC). No blocking I/O in event loop.
+CONSTRAINTS
+- Python >= 3.10; fully typed; public functions have docstrings.
+- Small modules (< 300 LoC when practical). No blocking I/O in the event loop.
 - UTC timestamps + ns-resolution monotonic ordering; SI units; snake_case channels.
-- Avoid global state. Inject dependencies (DB, bus) via FastAPI lifespans.
+- Avoid global state. Inject dependencies (DB, WS bus) via FastAPI lifespans/DI.
+- Dev DB: SQLite (aiosqlite). Prod DB: Postgres (psycopg[binary]).
+- WebSocket for live frames; REST for historical queries/exports.
 
-## Code Style
-- Use Ruff, Black, MyPy; docstrings on public functions.
-- Favor composition over inheritance; narrow interfaces for services.
-- Don’t pre-optimize; batch DB writes (executemany) where obvious.
+ARCHITECTURE TARGET
+- backend/app/
+  - main.py  (app factory, routes mount, WS)
+  - config.py
+  - db/{base.py, models.py, crud.py, migrations/}
+  - services/{manager.py, obd_service.py, gps_service.py, meshtastic_service.py, websocket_bus.py}
+  - api/{routes_sessions.py, routes_query.py, routes_health.py, routes_ws.py}
+  - utils/{timebase.py, packing.py, schemas.py}
+- frontend/{index.html, js/*.js, css/styles.css}
 
-## Task Priorities
-1) Make server boot and serve /health and WS echo with mock data.
-2) Create DB models and simple inserts/queries.
-3) Wire OBD/GPS stubs → WS.
-4) Add Meshtastic packer + 1 Hz sender (behind feature flag).
-5) Add CSV/Parquet export, then charts & map.
+TASK PRIORITIES
+1) Make server boot and serve /api/health and WS echo with mock data.
+2) Create DB models and simple inserts/queries; add Alembic migration.
+3) Wire OBD/GPS stubs → WS (typed, reconnect/backoff skeletons).
+4) Add Meshtastic packer + 1 Hz sender behind a feature flag.
+5) Add CSV/Parquet export, then charts & map for the dashboard and replay.
 
-## Non-Goals (for MVP)
-- Video capture, auth, multi-user, TimescaleDB, heavy front-end frameworks.
+NON-GOALS (MVP)
+- Video capture/overlay, auth/multi-user, TimescaleDB, heavy front-end frameworks.
 
-## Testing
-- Unit: packing/parsing, timebase.
-- Integration: DB insert/query, WS roundtrip.
+CODE STYLE
+- Enforce Ruff + Black + MyPy. Prefer composition over inheritance.
+- Narrow interfaces for services; extract helpers early.
+- Don’t pre-optimize; batch DB writes (`executemany`/copy) where obvious.
+
+TESTING
+- Unit: packing/parsing, timebase utilities.
+- Integration: DB insert/query paths, WebSocket roundtrip (smoke).
+- Add tests for any bug fix to prevent regressions.
+
+DEFINITION OF DONE (MVP)
+- Start/stop session; durable logging at ≥10–20 Hz combined for ≥30 minutes without loss.
+- Web dashboard median live update <200 ms.
+- Meshtastic uplink at 1 Hz with <1 s end-to-end lag.
+- CSV/Parquet export + replay scrubbing works.
+
+COMMIT & PR POLICY (MANDATORY)
+- Always work on a branch (e.g., `feat/<name>` or `fix/<name>`).
+- Make a **Conventional Commit** after each major change and after satisfying acceptance criteria for a subtask:
+  - `feat(scope): summary`, `fix(scope): summary`, `refactor`, `test`, `docs`, `ci`, `chore`
+- Open a PR per issue; include CHANGELOG bullet(s) under “Unreleased” and a brief test plan.
+- CI must pass (linters, typing, tests). Squash-merge into `main`.
+- After merge, delete the branch.
+
+WORKING MODE FOR CURSOR
+- Read `docs/PROJECT_BRIEF.md`, `docs/SCOPE.md`, `docs/ARCHITECTURE.md`, and the active issue’s acceptance criteria.
+- Implement only what the current issue asks. If requirements are unclear, add TODOs and propose follow-up issues rather than expanding scope.
+- Generate or update Alembic migrations whenever models change.
+- Prefer async APIs; never block the event loop on serial/OBD/GPS I/O.
+- Keep units explicit in channel names (e.g., `speed_kph`, `coolant_c`).
+
+SECURITY NOTES
+- Bind to LAN by default; restrict CORS to local host during dev.
+- Meshtastic channel must use a PSK; avoid PII in payloads (use anonymized car_id).
