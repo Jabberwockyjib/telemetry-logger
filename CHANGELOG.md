@@ -8,6 +8,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Session Creation UI**: Added "Create New Session" button and modal form on dashboard
+- **Session Form Fields**: Name (required), Car ID, Driver Name, Track/Location, Notes
+- **Form Validation**: Client-side validation for required fields and length limits
+- **Success Notifications**: Toast notifications for successful session creation
+- **Session Info Display**: Updated dashboard to show created session details
+- **Database Schema**: Added `notes` field to sessions table
+- **API Integration**: Frontend form submits to `/api/v1/sessions` endpoint
+- **Loading States**: Form submission with loading spinner and disabled states
+- **Error Handling**: Form error display and API error handling
+- **Modal UI**: Responsive modal with proper styling and accessibility
+- **Comprehensive Tests**: 7 backend integration tests and 20 frontend tests for session creation
+- Telemetry start/stop controls for simplified session management
+- One-click telemetry logging with automatic session creation
+- Real-time session status display with elapsed time
+- Backend API endpoints for telemetry control (`/api/v1/telemetry/start`, `/api/v1/telemetry/stop`, `/api/v1/telemetry/status`)
+- Frontend dashboard integration with start/stop buttons
+- Session management improvements with `is_active` column
+- Comprehensive tests for telemetry controls (backend and frontend)
+- Device scanning functionality with fresh port detection
+- Real-time device scanning API endpoint (`/api/v1/devices/scan`)
+- Dynamic port dropdown updates in setup wizard
+- Toast notification system for user feedback
+- Comprehensive device scanning tests
+
+### Fixed
+- Button visibility and contrast issues across all frontend pages
+- CSS variable definitions for consistent theming
+- WCAG accessibility compliance for button colors and focus states
+- Missing button styles in setup wizard and documentation pages
 - GPS service (`backend/app/services/gps_service.py`) with NMEA parsing capabilities:
   - Reads NMEA data from configurable serial ports with automatic reconnection and backoff logic
   - Parses GGA (Global Positioning System Fix Data), RMC (Recommended Minimum Navigation Information), and VTG (Track Made Good and Ground Speed) sentences
@@ -105,6 +134,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Error handling and edge case testing
   - Filter validation and parameter testing
   - Large dataset pagination testing
+
+### Fixed
+- Device setup wizard "Scan devices" button now works correctly
+- Port dropdowns update dynamically when scanning for devices
+- Preserves user selections when ports are rescanned
+- Handles empty device lists gracefully
+- Shows loading states and success/error feedback
 
 ### Changed
 - Updated FastAPI app to include session routes, WebSocket routes, export routes, and service manager integration
